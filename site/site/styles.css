@@ -1,0 +1,2949 @@
+/* Inter Tight (SIL Open Font License), self-hosted variable weight 100–900.
+   The file carries the whole weight axis; declaring only 400 700 here made the
+   browser clamp every other weight, so an 800 rendered as 700 and the
+   in-between weights (550, 590, 650) could not be used at all.
+   Latin subset only — 45 KB. Arabic has no coverage here and correctly falls
+   through to the system Arabic face. */
+@font-face{
+  font-family:"Inter Tight";
+  font-style:normal;
+  font-weight:100 900;
+  font-display:swap;
+  src:url("/site/fonts/inter-tight-latin.woff2") format("woff2");
+  unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ============================================================
+   TOKENS — see docs/DIRECTION.md
+   Monochrome by decision. The primary action is the highest-contrast
+   element on the page rather than the most colourful one, so there is no
+   accent hue to get wrong. Colour appears once, on availability, where it
+   carries meaning.
+   ============================================================ */
+:root{
+  color-scheme:dark;
+  /* Neutrals tinted a few degrees warm (OKLCH hue 75-85, chroma under .007),
+     so the monochrome reads as paper and ink and the green belongs to the
+     palette. Every grey that carries text clears 4.5:1 on the page, on cards
+     and on the hover step. */
+  --bg:#0C0B0A;
+  --surface:#151413;   /* panels sit one step above the page; --faint is solved against this */
+  --surface-2:#1B1A18;
+  --raise:#2A2926;
+  --line:rgba(255,255,255,.12);   /* .07 drew a 1.15:1 edge; boundaries need to be seen */
+  --line-2:rgba(255,255,255,.22);
+  --ink:#F4F2EF;
+  --muted:#ADAAA6;      /* 8.5:1 on the page, 8.0:1 on a card */
+  --faint:#898682;      /* 5.4:1 page, 5.1:1 card, 4.8:1 on the hover step */
+  --action:#F4F2EF;          /* CTA fill, inverted against the page */
+  --action-ink:#0C0B0A;
+  --action-hover:#FFFFFF;
+  --green:#3FB27F;
+  --green-bg:rgba(63,178,127,.12);
+  --green-bg-2:rgba(63,178,127,.2);
+  --bg-fade:rgba(12,11,10,.72);
+  /* How far the page steps back while the sidebar writes its question. Light
+     needs less: veiling dark text toward a light page lifts it four times over,
+     where veiling light text toward a dark one only halves it, so the same
+     number reads as washed-out there and merely dimmed here. */
+  --veil:.28;
+
+  /* TYPE SCALE. Nine steps, down from eighteen ad hoc sizes.
+     Fluid between a 360px phone and the width where each step peaks:
+     clamp(min, rem + vw, max) with both ends in rem, so browser zoom and a
+     larger default font still scale the text. The rem term is what makes zoom
+     work in the middle of the range; a pure vw value ignores it. Body never
+     drops under 16px, labels never under 12px, the display line stops at 92px
+     and nothing grows past its desktop size on a 2560px screen. */
+  --t-display:clamp(2.875rem, .5rem + 6.573vw, 5.75rem);   /* 46 to 92 at 1278 */
+  /* TYPE SCALE (2026-10-18, Yar's sizes): body 18, small 16 for links and
+     buttons, labels 16 for captions and tags. Two paragraph steps plus labels,
+     flat rather than fluid: the sizes are the point, and 18px holds at 360px.
+     Headings one size per level site-wide: answer h1s at --t-h1, h2s at
+     --t-section (statements included, his "no special size text unless
+     absolutely necessary, apart from the main title"), h3 and below at body
+     size, carried by weight 590. Only the homepage headline is bigger
+     (--t-display). */
+  --t-h1:clamp(2.125rem, .5rem + 4.026vw, 4rem);           /* answer titles, 34 to 64 at 1391 */
+  --t-h2:var(--t-section);                                 /* section titles, 22 to 40 */
+  --t-h3:1.125rem;                                         /* sub-headings and card titles, 18 at 590 */
+  --t-h4:1.125rem;
+  --t-lead:1.125rem;                                       /* ledes read as body */
+  --t-body:1.125rem;                                       /* 18 */
+  --t-copy:1.125rem;                                       /* running text in cards, 18 */
+  --t-sm:1rem;             /* controls and links: 16 */
+  --t-xs:1rem;             /* captions: 16 */
+  --t-micro:1rem;          /* labels, sentence case: 16 */
+
+  /* SPACE — one scale, named for its value so a glance tells you the number.
+     Base 4, with 2, 6 and 10 as half-steps because controls genuinely need
+     them. Before this the twelve declared steps were referenced zero times and
+     the sheet carried 40 distinct spacing values; anything still hardcoded
+     below is computed from something else and says so. */
+  --space-2:2px;    --space-4:4px;    --space-6:6px;    --space-8:8px;
+  --space-10:10px;  --space-12:12px;  --space-16:16px;  --space-20:20px;
+  --space-24:24px;  --space-32:32px;  --space-40:40px;  --space-48:48px;
+  --space-56:56px;  --space-64:64px;  --space-72:72px;  --space-80:80px;
+  --space-96:96px;  --space-128:128px;
+
+  /* The line every page headline starts on: the top of the sidebar's first
+     nav item (32px side padding + logo + wordmark stack, measured 167px).
+     Re-measure if the sidebar header changes. */
+  --page-top:167px;
+
+  --sidebar-w:280px;
+  --pad-x:52px;
+  /* WIDTH — every block picks one of these by name. Before this the answer
+     column shrink-wrapped to whatever happened to be on the page, so the
+     heading, the rule and the button sat at a different x on every page. */
+  --w-prose:600px;      /* a column of running text */
+  --w-wide:820px;       /* grids, tables, anything that needs the room */
+  --w-field:720px;      /* the ask field keeps its own presence */
+  --w-page:1180px;      /* the outer bound */
+  /* RADIUS. Three values: cards 12, controls 8, full round for tags and
+     chips. A shape inside another follows outer = inner + gap, so the ask
+     field (send key 8 + 10 inset) is 18 and a cover flush to a card's edge
+     takes the card's own 12. */
+  --r:12px;
+  --r-sm:8px;
+  --r-pill:999px;
+
+  /* MOTION. One strong ease-out for everything. The three durations it runs
+     at (press, hover, panel) are set with the polish block at the end. */
+  --ease:cubic-bezier(.23,1,.32,1);
+  --f-sys:Arial,"Helvetica Neue",Helvetica,sans-serif;
+  --f-alt:"Inter Tight",Arial,"Helvetica Neue",sans-serif;
+  --font:var(--f-alt);
+}
+/* ------------------------------------------------------------
+   THE LIGHT THEME
+   It used to exist only under html[data-theme="light"], which a deferred script
+   writes. So the entire light theme depended on JavaScript: the page painted
+   dark first and flipped up to 900ms later on a slow connection, and with
+   scripts off it never arrived. On a site whose argument is that the response
+   should be complete before any script runs, that was the one thing that wasn't.
+
+   Now the values live in one place (--l-*) and two short rules apply them: the
+   OS preference, which costs nothing and paints correctly on the first frame,
+   and the explicit attribute the toggle writes, which must still win over it.
+   Two assignment lists, one set of values, so they cannot drift.
+   ------------------------------------------------------------ */
+:root{
+  --l-bg:#F3F2EF;            /* warm paper, a real step below the card, not #FBFBFA */
+  --l-surface:#FBFBF9;       /* was #FFFFFF: pure white on the off-white page made
+                                every panel — cards, steps, the field — the
+                                brightest thing on screen. One step of restraint
+                                here softens all of them at once; nothing else
+                                declares its own white. */
+  --l-surface-2:#F8F7F4;
+  --l-raise:#E6E4E0;
+  --l-line:rgba(0,0,0,.14);  /* was .08, which drew a 1.2:1 edge on a white card */
+  --l-line-2:rgba(0,0,0,.22);
+  --l-ink:#100F0D;
+  --l-muted:#4F4C49;         /* 7.6:1 on bg, 8.2:1 on a card */
+  --l-faint:#6C6966;         /* 4.87:1 on bg, 5.26:1 on a card, 5.09:1 on the hover step */
+  --l-action:#100F0D;
+  --l-action-ink:#FBFBF9;
+  --l-action-hover:#000000;
+  --l-green:#09623B;         /* re-solved for the darker page: 5.54:1 on its own wash,
+                                and 4.86:1 on the hover wash, which #0B7647 never cleared */
+  --l-green-bg:rgba(11,118,71,.12);
+  --l-green-bg-2:rgba(11,118,71,.2);
+  --l-bg-fade:rgba(243,242,239,.72);
+  --l-veil:.2;
+}
+html[data-theme="light"]{
+  color-scheme:light;
+  --bg:var(--l-bg); --surface:var(--l-surface); --surface-2:var(--l-surface-2);
+  --raise:var(--l-raise); --line:var(--l-line); --line-2:var(--l-line-2);
+  --ink:var(--l-ink); --muted:var(--l-muted); --faint:var(--l-faint);
+  --action:var(--l-action); --action-ink:var(--l-action-ink);
+  --action-hover:var(--l-action-hover); --green:var(--l-green);
+  --green-bg:var(--l-green-bg); --green-bg-2:var(--l-green-bg-2);
+  --bg-fade:var(--l-bg-fade); --veil:var(--l-veil);
+}
+@media (prefers-color-scheme:light){
+  /* only until the visitor has chosen; data-theme always wins */
+  html:not([data-theme="dark"]):not([data-theme="light"]){
+    color-scheme:light;
+    --bg:var(--l-bg); --surface:var(--l-surface); --surface-2:var(--l-surface-2);
+    --raise:var(--l-raise); --line:var(--l-line); --line-2:var(--l-line-2);
+    --ink:var(--l-ink); --muted:var(--l-muted); --faint:var(--l-faint);
+    --action:var(--l-action); --action-ink:var(--l-action-ink);
+    --action-hover:var(--l-action-hover); --green:var(--l-green);
+    --green-bg:var(--l-green-bg); --green-bg-2:var(--l-green-bg-2);
+    --bg-fade:var(--l-bg-fade); --veil:var(--l-veil);
+  }
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--muted);
+  font-family:var(--font);font-size:var(--t-body);line-height:1.55;
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+  /* Inherited, so nothing on the site can strand a lone word on its last
+     line. It was declared on p, .a and .sub only, which missed list items,
+     .fact values, row sub-lines, summaries and the divs inside .prose.
+     Headings and short display blocks opt back out to balance below.
+     Anything declaring white-space (nowrap, pre) still wins over this. */
+  text-wrap:pretty;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--action);color:var(--action-ink)}
+
+.shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;height:100dvh}
+
+/* ---------------- SIDEBAR ---------------- */
+.side{border-right:1px solid var(--line);display:flex;flex-direction:column;padding:var(--space-32) var(--space-24) var(--space-24)}
+/* The mark is the wordmark split into two real pieces so nothing is ever
+   half-cut: wordmark-y.svg (the Y, 139x139) and wordmark-ar.svg (A R ®,
+   viewBox 112..421 of the original 421x139). Each is a mask, --ink is the
+   colour, so both themes are correct from one pair of assets.
+   At rest only the Y exists. On hover the A R ® box grows from zero width,
+   so the letters draw themselves in left to right at their true positions
+   and geometry (mask size is fixed at auto 100%, nothing stretches). */
+.logo{
+  display:block;height:39px;width:118px;
+  margin-bottom:var(--space-20);
+  transition:opacity .18s var(--ease);
+}
+/* The mark writes itself. Each stroke below is one pen-lift: a fat round
+   stroke down the centre of a letter, used as a mask over the filled
+   letter, so the letter appears already solid along the pen's route
+   rather than being outlined first or uncovered by a sliding box.
+   Reversing the delays on the way out makes it retract in the order it
+   was written, last stroke first.
+
+   The gap in stroke-dasharray is one unit longer than the path. At an equal
+   dash and gap a zero-length dash begins exactly at the end of the path, and
+   a round linecap draws that as a full dot, so the mark showed two stray
+   blobs at rest. */
+.logomark{display:block;height:100%;width:auto}
+/* Direct children only. A descendant selector also matches the pen paths
+   inside the masks, out-specifies their fill:none, and tints the mask a
+   few percent grey, which shows up as a faint ghost of the whole word. */
+.logomark>path{fill:var(--ink)}
+.lm-pen{fill:none;stroke:#fff;stroke-width:52;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:100 101;stroke-dashoffset:100;transition:stroke-dashoffset var(--lm-d) linear var(--lm-t)}
+.lm-reg{opacity:0;transition:opacity .16s var(--ease) 0s}
+.lm-a1{--lm-d:0.36s;--lm-t:0.49s}
+.lm-a2{--lm-d:0.14s;--lm-t:0.42s}
+.lm-r1{--lm-d:0.15s;--lm-t:0.31s}
+.lm-r2{--lm-d:0.20s;--lm-t:0.14s}
+.lm-r3{--lm-d:0.12s;--lm-t:0.05s}
+.logo:focus-visible .lm-pen{stroke-dashoffset:0}
+.logo:focus-visible .lm-a1{--lm-t:0.00s}
+.logo:focus-visible .lm-a2{--lm-t:0.29s}
+.logo:focus-visible .lm-r1{--lm-t:0.39s}
+.logo:focus-visible .lm-r2{--lm-t:0.51s}
+.logo:focus-visible .lm-r3{--lm-t:0.68s}
+.logo:focus-visible .lm-reg{opacity:1;transition-delay:0.78s}
+@media (prefers-reduced-motion:reduce){.lm-pen,.lm-reg{transition:none}}
+
+
+.wordmark{font-size:var(--t-h4);font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.1}
+.wordmark span{display:block;font-size:var(--t-sm);font-weight:400;color:var(--faint)}
+
+.nav{margin-top:var(--space-40)}
+.nav a{display:flex;align-items:center;gap:var(--space-12);font-size:var(--t-sm)}
+
+.ctx{margin-top:auto;padding-top:var(--space-20);display:grid;gap:var(--space-10)}
+/* The sidebar's booking link: plain text beside the green availability dot,
+   with no fill or edge, so the page's own booking button is the one green
+   fill in view (2026-10-12). It is a link to cal.com that the embed upgrades
+   to a popup in place. Its type and colour are in the polish block. The dot
+   takes the booking button's green, --cta, which in light is a step lighter
+   than --green (2026-10-13). */
+.pill{display:inline-flex;align-items:center;gap:var(--space-8);border-radius:calc(var(--r-sm) / 2);width:max-content;cursor:pointer}
+/* The dot glows from inside: a lighter centre fading to --cta, breathing
+   slowly. Nothing paints past its 6px (2026-10-29). */
+.pill i{width:6px;height:6px;border-radius:50%;background:var(--cta);
+  background:radial-gradient(circle at 50% 50%,color-mix(in oklab,var(--cta) 45%,white) 0%,var(--cta) 75%);
+  animation:dot-glow 2.4s ease-in-out infinite}
+@keyframes dot-glow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.3)}}
+@media (prefers-reduced-motion:reduce){.pill i{animation:none}}
+.badge{display:flex;align-items:center;gap:var(--space-8);color:var(--muted);border:1px solid var(--line);padding:var(--space-8) var(--space-12);font-size:var(--t-xs);font-weight:500;width:max-content}
+
+/* THE THEME KEY. The appearance control is one key in the site's key family:
+   a drawn keycap whose glyph is the resolved theme — sun in light, moon in
+   dark — and pressing it flips to the other. The Auto chip beside it stays
+   engaged while the site follows the OS, and becomes the way back once a
+   choice has been made; auto is still the default for every new visitor.
+
+   The glyph is one SVG morphing between its two states: the rays retract and
+   rotate away while the disc grows, and a circle inside the mask slides in to
+   carve the crescent. Transform and opacity only, on the site's one curve. */
+.themer{
+  width:36px;height:36px;display:grid;place-items:center;flex:0 0 auto;
+  border:1px solid var(--line);border-radius:var(--r-sm);color:var(--muted);
+  transition:border-color .2s var(--ease),color .2s var(--ease);
+}
+@media (hover:hover) and (pointer:fine){.themer:hover{border-color:var(--line-2);color:var(--ink)}}
+/* moon is the base state, matching the dark-first tokens above */
+.sm-core{transform-origin:12px 12px;transform:scale(1.75)}
+.sm-rays{transform-origin:12px 12px;opacity:0;transform:rotate(-40deg) scale(.62)}
+.sm-bite{transform:translate(-10px,7px)}
+.sm-core,.sm-rays,.sm-bite{transition:transform .45s var(--ease),opacity .45s var(--ease)}
+html[data-theme="light"] .sm-core{transform:none}
+html[data-theme="light"] .sm-rays{opacity:1;transform:none}
+html[data-theme="light"] .sm-bite{transform:none}
+@media (prefers-color-scheme:light){
+  /* the no-JS first paint, mirroring the token rules: data-theme always wins */
+  html:not([data-theme="dark"]):not([data-theme="light"]) .sm-core{transform:none}
+  html:not([data-theme="dark"]):not([data-theme="light"]) .sm-rays{opacity:1;transform:none}
+  html:not([data-theme="dark"]):not([data-theme="light"]) .sm-bite{transform:none}
+}
+
+/* ---------------- MAIN ---------------- */
+.main{position:relative;overflow:hidden}
+.stage{height:100dvh;overflow-y:auto;padding:0 var(--pad-x);scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+.stage::-webkit-scrollbar{width:9px}
+.stage::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:var(--r-sm)}
+.wrap{max-width:var(--w-page);margin:0 auto}
+
+/* hero + prompt */
+/* Height follows the content. min-height:74vh with centred content left a
+   large dead band between the chips and the sections below. Tall windows
+   are the exception: see the fold rules at the end of the HERO block. */
+/* Top padding is the page's top edge. --page-top lines the hero's first row,
+   the byline, up with the top of the sidebar's first nav item, except on
+   short windows, where the hero starts 64px higher (see "hero and track
+   record"); the answered stage uses the same token. The old 9dvh clamp made
+   the homepage start anywhere from 56 to 128 depending on the window. */
+.hero{display:flex;flex-direction:column;justify-content:center;
+  padding:var(--page-top) 0 clamp(var(--space-48),6dvh,var(--space-80))}
+h1.display{
+  font-size:var(--t-display);font-weight:700;color:var(--ink);
+  margin-bottom:var(--space-20);text-wrap:balance;
+}
+/* Who the visitor is dealing with, said once, before anything is claimed —
+   at the top of home, /about and /contact only. No other page carries it up
+   top; articles carry the .byline-foot variant in their author footer instead.
+   Sized to sit under the headline rather than compete with it, and small
+   enough that the portrait costs single-digit kilobytes. .byface stays in the
+   flow with zero width until an image is set on it, so the byline reads
+   correctly with no portrait and needs no layout change when one arrives. */
+.byline{display:flex;align-items:center;gap:var(--space-10);
+  margin-bottom:var(--space-16);font-size:var(--t-sm);color:var(--muted)}
+/* Yar's headshot, cropped tight on the face so it stays recognisable at 36px,
+   and in colour: a warm face beside the name reads as a person, and the site
+   already carries colour in the booking green. AVIF (2.0 KB) with a JPEG
+   fallback (4.9 KB), the shape the project covers use. Bump ?v= whenever the
+   photo changes, so no browser keeps the old face. */
+.byface{flex:none;width:36px;height:36px;border-radius:50%;
+  background:var(--surface) center/cover no-repeat;
+  border:1px solid var(--line);display:block;
+  background-image:image-set(
+    url("/site/brand/portrait.avif?v=2") type("image/avif"),
+    url("/site/brand/portrait.jpg?v=2")  type("image/jpeg"))}
+.byname{color:var(--ink);font-weight:600}
+/* The same byline in an article footer, where it replaces the plain "Written by"
+   line. Smaller portrait because it sits in a footer, not under a headline. */
+.byline-foot,.abody .byline{margin-bottom:0}
+.byline-foot .byface{width:28px;height:28px}
+.byline-foot .byname{font-weight:600}
+.sub{font-size:var(--t-body);max-width:56ch;line-height:1.6;margin-bottom:var(--space-40)}
+
+.promptblock{width:min(var(--w-field),100%)}
+body.answered .promptblock{position:fixed;left:var(--sidebar-w);right:0;bottom:34px;width:auto;padding:0 var(--pad-x);z-index:30;display:flex;justify-content:center;pointer-events:none}
+body.answered .promptblock::before{content:"";position:absolute;left:0;right:0;bottom:-34px;height:150px;background:linear-gradient(to top,var(--bg) 45%,var(--bg-fade) 74%,transparent);pointer-events:none!important}
+.pinner{width:min(var(--w-field),100%);position:relative;z-index:1;pointer-events:auto}
+
+/* THE INSTRUMENT. Two iterations tried to make the field a shape of pure
+   fill — no border, no ring, no rule — and both failed the same way: with no
+   boundary, a fill one step off the page reads as a disabled slab, or as
+   nothing at all. The site's primary control was its least visible element.
+
+   DIRECTION.md already names the mechanism this page separates things with:
+   hairlines doing the work that boxes do. So the field is drawn: surface
+   fill, the emphasis hairline at rest, a soft inset shadow, and on focus a
+   2px ink ring with a gap, the same ring every control gets and the
+   highest-contrast state of the page's most important control. Its corners
+   follow the send key inside it (polish block, 2026-10-04). */
+.field{
+  display:flex;align-items:center;gap:var(--space-12);background:var(--surface);
+  border:1px solid var(--line-2);
+  padding:0 var(--space-10) 0 var(--space-20);height:60px;
+}
+
+.field input{
+  /* the input took its 20px content height inside a 60px box, so two thirds of
+     the site's primary control did nothing when clicked. min-width:0: WebKit
+     kept it at its intrinsic width and pushed the send key out of the field. */
+  flex:1;min-width:0;align-self:stretch;background:none;border:none;outline:none;color:var(--ink);
+  font-family:var(--font);font-size:var(--t-body);letter-spacing:-.006em;caret-color:var(--ink);
+}
+.field input::placeholder{color:var(--faint)}
+/* The slash key is real — app.js binds "/" and ⌘K to this input — so it may
+   sit in the field as furniture: drawn like a key, quiet as metadata. It only
+   helps before focus arrives, so it clears out the moment you are in the
+   field or a chip's typewriter is. opacity, not display: it keeps its seat
+   and nothing reflows. Gone entirely where there is no keyboard to press. */
+.key{
+  min-width:26px;height:26px;padding:0 var(--space-6);border-radius:var(--r-sm);
+  border:1px solid var(--line);font-size:var(--t-xs);
+  font-family:var(--font);display:grid;place-items:center;flex:0 0 auto;
+}
+.field:focus-within .key,.field.on .key{opacity:0}
+@media (hover:none){.key{display:none}}
+/* The send key: an outlined ghost while there is nothing to send, the solid
+   inverted action key the moment there is. The two states share a shape, so
+   the promotion reads as the same key charging, not a control appearing. */
+.go{
+  width:40px;height:40px;
+  border:1px solid var(--line);background:none;color:var(--faint);
+  display:grid;place-items:center;flex:0 0 auto;pointer-events:none;
+}
+.field.on .go{background:var(--action);border-color:var(--action);color:var(--action-ink);pointer-events:auto}
+
+/* ============================================================
+   ASKING — the page steps back while the sidebar writes its question
+
+   A nav click types its question into the field before the page moves. For
+   that beat everything except the field settles back, so the one thing at
+   full strength is the thing being written into.
+
+   It has to be a veil rather than opacity on a container: opacity groups its
+   whole subtree and a child cannot opt back out to 1, so there is no way to
+   dim .shell and exempt the field inside it. Instead the page is covered in
+   its own background colour and the field is lifted over the cover — the same
+   trick as the mobile nav scrim further down, and likewise with no extra
+   element in the markup.
+
+   z-index 70 clears everything that competes: the topbar at 20/50, the fixed
+   promptblock at 30, the mobile header band at 45, the off-canvas scrim at 51
+   and panel at 55, the navtoggle at 60. The skip link at 200 deliberately
+   stays above it — an escape hatch should never be behind a veil.
+
+   pointer-events stays none. This dims the page, it does not lock it: a
+   second nav click mid-word simply restarts the typewriter.
+
+   Quick in, slow out. The entrance is 200ms so it has landed before the
+   shortest question ("Who am I?", nine characters, 306ms) is half typed —
+   at the old 260ms it was still arriving when it was already due to leave,
+   which read as a bounce. The exit is 460ms, which is not a taste: it is
+   exactly the .stage height transition on exactly the same curve, so the
+   veil lifting and the page resizing are one movement rather than two that
+   happen to overlap.
+
+   The field grows on the same two clocks. Scale rather than width or padding
+   because those reflow — they would shove the chips down the page mid-word,
+   and the whole point is that only the field moves.
+   ============================================================ */
+body::after{
+  content:"";position:fixed;inset:0;z-index:70;
+  background:var(--bg);opacity:0;pointer-events:none;
+  transition:opacity .46s var(--ease);            /* the exit */
+}
+body.asking::after{
+  opacity:var(--veil);
+  transition:opacity .2s var(--ease);             /* the entrance */
+}
+body.asking .promptblock{z-index:71}
+
+/* The one element that does not step back, and the only one that moves.
+   The focus mark goes out fast and comes back on the slow clock: during the
+   veil the focus is the machine's doing rather than the visitor's, and a mark
+   sitting on top of the thing being emphasised is the opposite of emphasis. It
+   returns as the page settles, so keyboard focus is never left unmarked once
+   the movement is over. */
+body.asking .field{
+  transform:scale(1.025);
+  transition:border-color .22s var(--ease),background .22s var(--ease),
+             transform .2s var(--ease);
+}
+
+.chips{display:flex;flex-wrap:wrap;gap:var(--space-8);margin-top:var(--space-16)}
+/* The chips are suggestions, not controls, so they sit a full step below
+   the field. Their fill, hairline, padding and hover are in the polish block:
+   a faint tint and the softest hairline, never the field's own surface,
+   which read as a promotion. */
+.chip{border:1px solid var(--line);border-radius:var(--r-pill);font-size:var(--t-sm)}
+body.leaving .hero .sub,body.leaving .hero h1,body.leaving .chips{opacity:0;transform:translateY(-8px);transition:opacity .16s var(--ease),transform .16s var(--ease)}
+/* Returning home is the mirror of leaving, choreographed as one movement.
+   Leaving lifts the hero out and docks the field. Coming back, the field FLIPs
+   460ms up into the hero while the hero settles down into place behind it —
+   same easing curve, staggered so the page resolves as a single system rather
+   than the field moving alone through static content. */
+body.returning .hero h1,
+body.returning .hero .sub,
+body.returning .chips,
+body.returning #homescroll{opacity:0;transform:translateY(-10px)}
+
+.hero h1,.hero .sub,.chips,#homescroll{
+  transition:opacity .40s var(--ease),transform .40s var(--ease)}
+.hero h1{transition-delay:60ms}
+.hero .sub{transition-delay:110ms}
+.chips{transition-delay:260ms}        /* the field has cleared this band by now */
+#homescroll{transition-delay:260ms}
+/* The hero byline joins the rest of the home hero in hiding: an answer page
+   carries its own byline inside #answer-body, and leaving the hero one visible
+   printed it twice above the headline. */
+body.answered .hero h1,body.answered .hero .sub,body.answered .hero .byline,body.answered .chips,body.answered #homescroll{display:none}
+body.answered .hero{min-height:0;padding:0}
+/* 72px clears the 60px .topbar with a 12px gap. --space-72 went missing when
+   the spacing scale was consolidated, and an undefined custom property makes
+   the whole declaration invalid, so this silently computed to 0 and every
+   answer page rendered its H1 underneath the Back/Home buttons. */
+body.answered .stage{padding-top:var(--page-top)}
+
+/* Home hero, in the order a visitor needs it: who it is for, the
+   headline, the sentence that says what the work is, the one action, then the
+   film, the figures and the client marks (2026-10-13). Every piece hides with
+   the rest of the hero on answer pages and moves with it on leaving and
+   returning. */
+.herocta{margin:var(--space-24) 0 0;gap:var(--space-16) var(--space-24)}
+.herocta,.herofilm,.minireel{transition:opacity .40s var(--ease),transform .40s var(--ease);transition-delay:160ms}
+body.leaving .herocta,body.leaving .herofilm,body.leaving .minireel{opacity:0;transform:translateY(-8px);transition:opacity .16s var(--ease),transform .16s var(--ease)}
+body.returning .herocta,body.returning .herofilm,body.returning .minireel{opacity:0;transform:translateY(-10px)}
+body.answered .herocta,body.answered .herofilm,body.answered .minireel,body.answered .hero .quotes{display:none}
+/* Laptop windows are often under 800px tall once the browser chrome is gone.
+   The headline gives up a little size there so the booking row under the
+   pills still lands above the fold. */
+@media (min-width:721px) and (max-height:820px){:root{--t-display:clamp(46px,5.6vw,74px)}.hero .sub{margin-bottom:var(--space-24)}.herocta{margin-top:var(--space-16)}}
+
+/* ---------------- HOME SCROLL CONTENT ---------------- */
+.sec{padding:var(--space-56) 0;border-top:1px solid var(--line)}
+.sec h2{font-size:var(--t-h2);font-weight:700;color:var(--ink);letter-spacing:-.015em;margin-bottom:var(--space-12)}
+.sec .lede{font-size:var(--t-sm);margin-bottom:var(--space-32);max-width:60ch}
+
+/* Problem, proof and push sections on home. Problems and proof share the
+   step card's surface so the page keeps one card language. */
+.probs,.proofs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-16)}
+.prob,.proof{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--space-20) var(--space-24)}
+.prob h3,.proof h3{font-size:var(--t-body);font-weight:600;color:var(--ink);margin-bottom:var(--space-6);letter-spacing:-.01em}
+.prob p,.proof p{font-size:var(--t-sm);line-height:1.65}
+.proof .k,.proofcred .k{display:block;font-size:var(--t-micro);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:var(--space-10)}
+.proofcred{margin-top:var(--space-16);margin-bottom:var(--space-24)}
+.proofcred p{font-size:var(--t-sm);line-height:1.6}
+.bridge{margin-top:var(--space-24);font-size:var(--t-sm);color:var(--ink)}
+.step h3{font-size:var(--t-body);font-weight:600;color:var(--ink);margin-bottom:var(--space-6);letter-spacing:-.01em}
+.sec .steps{margin-bottom:var(--space-24)}
+.pushnote{font-size:var(--t-xs);color:var(--faint)}
+.toollede{font-size:var(--t-sm);line-height:1.6;max-width:64ch;margin-bottom:var(--space-16)}
+.prob:last-child:nth-child(odd){grid-column:1/-1}
+@media (max-width:1080px){.probs,.proofs{grid-template-columns:1fr}}
+
+.faq{border-top:1px solid var(--line)}
+.faq details{border-bottom:1px solid var(--line)}
+/* The last row's rule and the next section's top rule sat 58px apart with
+   nothing between them, which read as an empty question. Every row keeps its
+   rule, and that last one is the divider, so the next section drops its own. */
+.sec:has(#faq) + .sec{border-top:0}
+.faq summary{
+  list-style:none;cursor:pointer;padding:var(--space-20) var(--space-4);display:flex;justify-content:space-between;
+  align-items:center;gap:var(--space-20);font-size:var(--t-body);color:var(--ink);font-weight:500;
+}
+.faq summary::-webkit-details-marker{display:none}
+/* The disclosure mark is a keycap — the same drawn-key family as the ask
+   field's send control and slash hint, so the page speaks one language of
+   keys: ghost key closed, the solid inverted action key open, the mark
+   rotating + into ×. font-size:0 turns off the span's own "+" text node so
+   the pseudo-elements can carry the mark. */
+.faq summary .x{
+  width:28px;height:28px;flex:0 0 auto;position:relative;
+  border:1px solid var(--line);border-radius:var(--r-sm);
+  font-size:0;color:var(--faint);
+  transition:background .2s var(--ease),border-color .2s var(--ease),color .2s var(--ease);
+}
+/* Two drawn bars, not the font's "+". Inter Tight sets that glyph's ink
+   centre 1.4px BELOW its own line box's centre, so place-items:center centred
+   the box and left the mark low; rotating 45deg then swung that offset
+   diagonally and the × landed ~1px down-left of the key's centre. Checked
+   against a crosshair on the true centre, 2026-08-12. The bars match the
+   glyph exactly — 8.5 x 8.5, 1.5px stroke at 18px — but are centred by
+   construction and do not depend on Inter Tight having loaded. */
+.faq summary .x::before,
+.faq summary .x::after{
+  content:"";position:absolute;top:50%;left:50%;background:currentColor;
+  transition:transform .3s var(--ease);
+}
+.faq summary .x::before{width:8.5px;height:1.5px;margin:-.75px 0 0 -4.25px}
+.faq summary .x::after{width:1.5px;height:8.5px;margin:-4.25px 0 0 -.75px}
+.faq details[open] summary .x{background:var(--action);border-color:var(--action);color:var(--action-ink)}
+.faq details[open] summary .x::before,
+.faq details[open] summary .x::after{transform:rotate(45deg)}
+/* The whole row takes the ring, like every other control. The ring used to sit
+   on the keycap alone because Chromium matched :focus-visible on a summary
+   clicked with the mouse. Chrome 154 no longer does (tested 2026-10-05): a
+   click shows no ring, and keyboard focus marks the full question. */
+.faq summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+/* padding-block, not height: WCAG 2.2 2.5.8 wants a 24px target and these
+   measured 21 and 23. Vertical padding only, so the inline ones inside a
+   sentence keep their position on the line.
+
+   inline, not inline-block, and no margin-top — what the note above always
+   intended. Every .alink sits at the end of a sentence, and as an
+   inline-block each was an unbreakable ~30-character atom: the sentence had
+   to wrap before it, stranding the closing word ("back.") alone, and
+   margin-top then pushed that line down so it read as its own paragraph.
+   text-wrap:pretty could not help — the last line was not short, it held the
+   atom. Padding still enlarges an inline hit area, so the target is
+   unchanged. Measured 2026-08-12. */
+.alink{padding-block:var(--space-4);font-size:var(--t-xs);color:var(--ink);border-bottom:1px solid transparent}
+/* The FAQ is the exception to the note above. Here the link is not part of the
+   answer's last sentence, it is the way out of it, so it breaks to its own
+   line — display:block does that without a <br> in the markup, and
+   width:fit-content keeps the rule the width of the words instead of the 70ch
+   answer column. It also fixes what the inline version did when it wrapped:
+   the underline split across two lines and read as two half-links.
+
+   Its underline shows at rest, drawn by the polish block. Inside a sentence
+   the surrounding prose marks a link; alone on its own line, with nothing
+   around it, hover-only left it looking like a stray caption. */
+.faq .alink{display:block;width:fit-content;margin-top:var(--space-12);border-bottom:0}
+/* The answer fades in out of a 2px blur while the height opens. The polish
+   block animates the box that holds it. */
+.faq .a{padding:0 var(--space-4) var(--space-24);max-width:70ch;line-height:1.68}
+
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-16)}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:var(--space-20);display:flex;flex-direction:column;gap:var(--space-10);text-align:left;
+}
+.card .thumb{aspect-ratio:16/9;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center}
+.card h3{font-size:var(--t-body);color:var(--ink)}
+.card p{font-size:var(--t-xs);line-height:1.55}
+.card .meta{margin-top:auto;padding-top:var(--space-6)}
+
+/* ---------------- FEATURED TOOL ---------------- */
+/* Two cards, not one split card: the install column has to stand on its own
+   when the grid stacks, and a divider inside one card does not. */
+.tool{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:var(--space-16);align-items:start}
+.tmain,.tside{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--space-24);
+  display:flex;flex-direction:column;gap:var(--space-16)}
+.tmain p{line-height:1.6;max-width:64ch}
+.tmain .fl{margin-top:0}
+.tmain .fl li{color:var(--muted);line-height:1.55}
+.tside pre{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:var(--space-12) var(--space-16);overflow-x:auto;white-space:pre;color:var(--ink);
+  font:500 var(--t-xs)/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.tside .note{font-size:var(--t-xs);line-height:1.55;color:var(--faint)}
+.tside .ctarow{margin-top:var(--space-4)}
+/* The secondary action keeps the primary's box so the two sit level; the
+   border replaces the fill, and one pixel of padding pays for it. */
+.cta.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+/* The email gate on the zip. Input and button share one row and stretch to
+   one height; on a narrow card the button wraps under the input. */
+.getzip{display:flex;flex-direction:column;gap:var(--space-10)}
+.getzip label{font-size:var(--t-sm);font-weight:500;color:var(--ink)}
+.getrow{display:flex;flex-wrap:wrap;gap:var(--space-8);align-items:stretch}
+.getrow input[type=email]{flex:1 1 180px;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:var(--space-16);font-family:var(--font);color:var(--ink);outline:none}
+.getrow input[type=email]::placeholder{color:var(--faint)}
+.getrow input[type=email]:focus-visible{border-color:var(--line-2);outline:2px solid var(--ink);outline-offset:2px}
+.getrow .cta{align-self:stretch}
+.getrow .cta:disabled{opacity:.6;cursor:default}
+.getstatus{font-size:var(--t-xs);line-height:1.55;color:var(--muted)}
+.getstatus:empty{display:none}
+.getdone{line-height:1.55;color:var(--ink)}
+.getdone a{color:inherit}
+/* display on these two is set by author rules, which beat the UA's [hidden]. */
+.cta[hidden],.getzip[hidden]{display:none}
+
+/* ---------------- ANSWER ---------------- */
+/* margin:0 auto on a grid item makes it shrink-wrap, so the column was as wide
+   as whatever happened to be on the page: the heading, rule and CTA sat at a
+   different x on every page, moving up to 88px on navigation. */
+.answer{display:none;width:100%;max-width:var(--w-page);margin:0 auto}
+body.answered .answer{display:block}
+.answer .b{opacity:0;transform:translateY(15px)}
+.answer.reveal .b{opacity:1;transform:none;transition:opacity .4s var(--ease),transform .4s var(--ease)}
+.hr{height:1px;background:var(--line);transform:scaleX(0);transform-origin:left}
+.answer.reveal .hr{transform:scaleX(1);transition:transform .62s var(--ease)}
+
+.ahead{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-24);padding-bottom:var(--space-20)}
+.ahead h1{flex:1;color:var(--ink);text-wrap:balance}
+.ahead .tag{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:var(--space-6) var(--space-12);white-space:nowrap}
+.abody{padding-top:var(--space-32);display:grid;gap:var(--space-32)}
+/* balance, not the inherited pretty: a lead is a short display block, and
+   pretty only protects its last line — measured on /contact, that still left
+   the closing address alone on a line. balance evens all three instead. */
+.lead{font-size:var(--t-lead);text-wrap:balance;color:var(--ink);max-width:var(--w-prose);font-weight:500}
+.prose p{max-width:var(--w-prose);font-size:var(--t-body);line-height:1.7}
+.prose p+p{margin-top:var(--space-16)}
+
+/* Equal columns on the shared 24px gap that every homepage row uses
+   (2026-10-12), on every page that has fact cards. */
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-24)}
+/* Same specificity as .facts, declared after it, so it wins at full width —
+   and the 1080/520 breakpoints below come later still, so a 3-up row falls
+   back to 2 and then 1 exactly like a 4-up one. */
+.facts-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.facts-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fact{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--space-16) var(--space-20)}
+/* A number that needs a footnote gets one here rather than in the prose
+   underneath, where nobody reading the figure would look for it. The text is
+   real markup, so it is in the page for a crawler whether or not it is
+   revealed, and aria-describedby ties it to the control. */
+.fact .k{display:block;margin-bottom:var(--space-6)}
+.fact .v{font-size:var(--t-body);color:var(--ink);letter-spacing:-.01em;line-height:1.35}
+/* One list, two jobs. Inside a card it is supporting detail under a price, so
+   it is small and muted. On its own it is the content of a section, so it takes
+   body size and full ink. The shared part is only the shape. */
+.fl{list-style:none;margin:var(--space-10) 0 0;padding:0;
+  display:flex;flex-direction:column;gap:var(--space-8)}
+.fl li{position:relative;padding-left:var(--space-16);
+  font-size:var(--t-body);color:var(--ink);line-height:1.55}
+.fl li::before{content:"";position:absolute;left:0;top:.66em;
+  width:5px;height:5px;border-radius:50%;background:var(--faint)}
+/* Card context: nine other pages use .fact and none of them want a list, so
+   every card-specific rule stays behind .fact. */
+.fact .fl{gap:var(--space-6)}
+.fact .fl li{padding-left:var(--space-12);color:var(--muted);line-height:1.45}
+.fact .fl li::before{top:.62em;width:4px;height:4px}
+/* The third card carries no supporting number, so its list starts level. */
+.fact .k + .fl{margin-top:var(--space-10)}
+
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-16)}
+.p{color:inherit;text-decoration:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--space-24);display:flex;flex-direction:column;gap:var(--space-12);text-align:left}
+.p .top{display:flex;justify-content:space-between}
+.p h2{font-size:var(--t-h3);color:var(--ink);letter-spacing:-.018em}
+/* Card blurbs are two or three lines in a narrow column, which is balance's
+   case rather than pretty's — measured on /projects, pretty still left
+   "team." by itself under a full line. */
+.p p,.card p{text-wrap:balance}
+.p p{line-height:1.6}
+
+.rows{border-top:1px solid var(--line)}
+/* Each row is a link to its own page, so the grid carries three things, not
+   four: the name and its line, one plain-English label, and the chevron that
+   says the row goes somewhere. The old middle track held a category word
+   (PLATFORM, AGENT) that the label now says better, and the old 80px right
+   track was too narrow for the label to sit on one line. */
+.row{display:grid;grid-template-columns:1fr auto 20px;gap:var(--space-20);align-items:baseline;padding:var(--space-16) var(--space-4);border-bottom:1px solid var(--line);width:100%;text-align:left;color:inherit;text-decoration:none}
+.row .t{font-size:var(--t-body);color:var(--ink);letter-spacing:-.008em}
+.row .t small{display:block;color:var(--muted);margin-top:var(--space-4);letter-spacing:0}
+.row .r{text-align:right}
+/* The chevron is the only mark that says this row leads somewhere. It slides
+   on hover rather than changing colour alone, so the affordance survives for
+   anyone who cannot pick the faint/ink step apart. */
+/* baseline, not center: centring it on a two-line row floated it below the
+   label, which reads as a stray mark rather than the label's arrow. */
+.row .arw{align-self:baseline;color:var(--faint);transition:transform .2s var(--ease),color .2s var(--ease)}
+.row:focus-visible .arw{transform:translateX(3px);color:var(--ink)}
+/* The .hr after the list is the closing rule; a last row that draws its own
+   would double it. */
+.rows .row:last-child{border-bottom:none}
+/* The two metadata tracks were absolute while the content track was 1fr, so the
+   content was the only thing that could yield. The fixed tracks plus their gaps
+   take 266px, which on a phone left 61px for the words and set an eight-word
+   sentence over seven lines. Below the width where all three fit, the row wraps:
+   the name and its line take the full measure, and the metadata falls beneath as
+   one row, the way every other metadata line on the site already reads. */
+@media (max-width:900px){
+  .row{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--space-10) var(--space-20);padding:var(--space-20) var(--space-4)}
+  .row .t{flex:1 1 100%;min-width:0}
+  .row .r{text-align:left}
+  /* Pushed to the far end of the wrapped metadata line, where it reads as the
+     row's "go" rather than as punctuation after the label. */
+  .row .arw{margin-left:auto}
+}
+
+.steps{display:grid;gap:var(--space-16)}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--space-20) var(--space-24);display:grid;grid-template-columns:34px 1fr;gap:var(--space-20)}
+.step .n{width:26px;height:26px;border-radius:var(--r-sm);background:var(--action);color:var(--action-ink);display:grid;place-items:center;font-size:var(--t-micro);font-weight:700}
+.step h2{font-size:var(--t-body);color:var(--ink);margin-bottom:var(--space-6);letter-spacing:-.01em}
+.step p{line-height:1.65;max-width:64ch}
+
+.afoot{display:flex;flex-direction:column;gap:var(--space-20);padding-top:var(--space-6)}
+/* As a heading, .src labels the block beneath it rather than sitting in it.
+   At margin 0 the label's own small box lands on the content's top edge. */
+h2.src,h3.src{margin-bottom:var(--space-16)}
+.follows{display:flex;flex-wrap:wrap;gap:var(--space-8);align-items:center}
+.follows .l{margin-right:var(--space-4)}
+.cta{display:inline-flex;align-items:center;gap:var(--space-10);text-decoration:none;font-size:var(--t-sm);align-self:flex-start}
+
+/* opacity:0 hides it from the mouse, not the keyboard: both buttons stayed in
+   the tab order on the homepage, and one of them left the site. */
+.topbar{position:absolute;top:0;right:0;height:60px;display:flex;align-items:center;padding:0 var(--pad-x);gap:var(--space-8);opacity:0;visibility:hidden;transition:opacity .24s var(--ease),visibility 0s linear .24s;z-index:20;pointer-events:none}
+body.answered .topbar{opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
+.topbar button{border:1px solid var(--line);padding:var(--space-8) var(--space-12);font-size:var(--t-xs);color:var(--muted)}
+
+@media (max-width:1080px){:root{--pad-x:28px;--sidebar-w:248px}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}.pgrid,.cards{grid-template-columns:1fr}.tool{grid-template-columns:minmax(0,1fr)}}
+/* two 162px columns made the longer values wrap and the top row 26px taller */
+@media (max-width:520px){.facts{grid-template-columns:1fr}}
+/* No sidebar to align to below 720px, so the desktop 167px top edge just reads
+   as dead space above the H1. The nav toggle sits at 60px, so 96px clears it. */
+@media (max-width:720px){.shell{grid-template-columns:1fr}body.answered .promptblock{left:0}:root{--page-top:96px}}
+@media (max-width:520px){:root{--page-top:80px}}
+/* *::before and *::after too: a bare * never matches a pseudo-element, so the
+   sidebar highlight, the FAQ key's bars and the scrim kept moving. */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}.answer .b{opacity:1;transform:none}.hr{transform:scaleX(1)}}
+
+/* ============================================================
+   ACCESSIBILITY — visible focus, skip link, screen-reader text
+   ============================================================ */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skiplink{
+  position:fixed;top:8px;left:8px;z-index:200;transform:translateY(-200%);
+  background:var(--action);color:var(--action-ink);border-radius:var(--r-sm);padding:var(--space-12) var(--space-20);
+  font-size:var(--t-sm);font-weight:600;transition:transform .18s var(--ease)
+}
+.skiplink:focus-visible{transform:translateY(0)}
+/* No border-radius here: the outline already follows the element's own
+   corners, and setting it made every chip animate from a 100px pill to a 6px
+   rectangle the moment a keyboard reached it. */
+/* One ring for every control: 2px of ink with a 2px gap between it and the
+   control, so it reads as a ring around the control and clears 3:1 against
+   both pages by a wide margin (17:1). The ask field draws the same ring
+   around itself with .field:focus-within, so the input inside must not add
+   a second one. */
+a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible,
+[tabindex]:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+/* focused programmatically to move the reading position, not by the user */
+#input:focus-visible,.stage:focus-visible,.answer:focus-visible,#answer-title:focus-visible{outline:none}
+button.cta{border:none;cursor:pointer;font:inherit}
+
+/* ============================================================
+   MOBILE NAVIGATION
+   The sidebar is the only navigation, so below 720px it used to vanish and
+   leave the site unnavigable. It is now the same <aside> moved off-canvas and
+   translated back in — one element, transformed, never a duplicated menu.
+   ============================================================ */
+.navtoggle{display:none}
+
+@media (max-width:720px){
+  .navtoggle{display:inline-flex;align-items:center;justify-content:center;position:fixed;top:var(--space-12);left:var(--space-12);z-index:60;
+    width:44px;height:44px;padding:0;border:1px solid var(--line);cursor:pointer}
+  /* when open it rides to the panel's inner edge so it stops covering the logo */
+  body.nav-open .navtoggle{transform:translateX(calc(min(320px,86vw) - 68px))}
+  .bars{display:block;position:relative;width:18px;height:11px}
+  .bars i{position:absolute;left:0;right:0;height:1.5px;background:var(--ink);border-radius:1px;
+    transition:transform var(--dur-panel) var(--ease),opacity var(--dur-hover) var(--ease)}
+  .bars i:nth-child(1){top:0}
+  .bars i:nth-child(2){top:5px}
+  .bars i:nth-child(3){top:10px}
+  body.nav-open .bars i:nth-child(1){transform:translateY(5px) rotate(45deg)}
+  body.nav-open .bars i:nth-child(2){opacity:0}
+  body.nav-open .bars i:nth-child(3){transform:translateY(-5px) rotate(-45deg)}
+
+  .side{position:fixed;top:0;bottom:0;left:0;z-index:55;width:min(320px,86vw);
+    background:var(--bg);border-right:1px solid var(--line);overflow-y:auto;
+    transform:translateX(-100%);transition:transform var(--dur-panel) var(--ease)}
+  body.nav-open .side{transform:translateX(0)}
+
+  /* scrim, with no extra element in the markup. 51 puts it over the Back and
+     Home bar (50), which dims and returns with the page. */
+  .shell::before{content:"";position:fixed;inset:0;z-index:51;background:rgba(0,0,0,.5);
+    opacity:0;pointer-events:none;transition:opacity var(--dur-panel) var(--ease)}
+  body.nav-open .shell::before{opacity:1;pointer-events:auto}
+  /* body already has overflow:hidden and is not the scroller, so locking it did
+     nothing: the page kept scrolling 300px behind the open panel. .stage is the
+     scroll container, so that is what has to be held. */
+  body.nav-open .stage{overflow:hidden}
+  .side{overscroll-behavior:contain}
+
+  /* The menu button is 44px tall at top:12, so its centre is at 34. The topbar
+     was 60px tall with its buttons centred at 30, which put them 4px higher
+     than the hamburger and read as misaligned. 68px puts both centres on 34. */
+  .topbar{padding-left:var(--space-64);height:68px}   /* clears the 44px toggle at left:12 */
+
+  /* body.answered .stage sets padding-top:72px and outranks a bare .stage
+     rule, so the title was landing under the controls. This needs the same
+     specificity to win, and enough air to read as a margin. */
+  .stage{padding-top:68px}          /* mirrors the mobile topbar height */
+  body.answered .stage{padding-top:104px} /* lowest control sits at 56, plus a 48 gap */
+}
+
+/* Comfortable targets where there is no cursor. .go is the submit button: it is
+   the single most-tapped control on the site and was 38px, under the minimum.
+   .logo and .badge are links too, and were 39px and 38px. */
+@media (pointer:coarse){
+  #nav a,.chip,.topbar button,.themer,.card,.go,.logo,.badge,.pill{min-height:44px}
+  /* One SVG scaling inside one box now, so the touch size is the only thing
+     left to set. The pieces keep their proportions from the viewBox. */
+  .logo{height:44px;width:133px}
+
+  .go{display:inline-flex;align-items:center;justify-content:center}
+  .go,.themer{min-width:44px}
+  .badge{align-items:center}
+}
+
+.ctarow{display:flex;flex-wrap:wrap;gap:var(--space-10);align-items:center}
+
+/* ============================================================
+   TYPOGRAPHIC FINISH
+   ============================================================ */
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+/* pretty is inherited from body; headings are the deliberate exception —
+   balance evens a two or three line heading instead of merely protecting
+   its last word. */
+h2,h3{text-wrap:balance}
+
+/* ============================================================
+   FIXED FURNITURE — reserve real space for it
+   The menu button and the docked ask field are both fixed over .stage, which
+   is the scroll container. Space for them is measured in app.js and published
+   as --dock-h / --header-h, so content can never scroll underneath either.
+   ============================================================ */
+:root{--dock-h:0px;--header-h:0px}
+
+/* The stage physically ends above the docked field rather than being padded
+   past it, so short pages cannot land a CTA behind the input. */
+/* The stage resizes on the same curve and duration as the field's FLIP into
+   the docked position, so the layout moves with the field rather than
+   snapping around it. */
+.stage{transition:height 460ms var(--ease)}
+body.answered .stage{height:calc(100dvh - var(--dock-h));padding-bottom:var(--space-40)}
+
+/* A short answer used to sit at the top of a full-height stage with a few
+   hundred pixels of nothing between it and the docked field. Contact and
+   pricing are the shortest pages and read as truncated because of it.
+   align-content centres the block only while it fits; the moment the content
+   is taller than the stage this behaves exactly like the old top alignment,
+   and "safe" keeps the first line reachable rather than clipped above. */
+/* start, not centre. Centring made the first line's position a function of how
+   long the page was: a short answer sat 35px down, a long one 0px, so the
+   heading moved every time you navigated. The padding above sets it now, and
+   it sets it identically on every answer. */
+body.answered .wrap{min-height:100%;display:grid;align-content:start}
+
+@media (max-width:720px){
+  /* a band behind the menu button, so content passes under a surface instead
+     of colliding with a floating control */
+  /* Solid until past the lowest control, then a short fade. The old stops put
+     the fade at 58% of a band sized off the menu button alone, so a heading
+     scrolling past the Back and Home buttons showed through it. Where scroll
+     timelines exist, the polish block makes it fully solid with a hairline
+     that appears once the page has scrolled. */
+  .shell::after{content:"";position:fixed;top:0;left:0;right:0;height:var(--header-h);
+    z-index:45;pointer-events:none;
+    background:linear-gradient(to bottom,var(--bg) 0 72%,var(--bg-fade) 88%,transparent)}
+  body.nav-open .shell::after{opacity:0}
+
+  /* The band exists to put a surface between scrolled content and the floating
+     controls. It was covering the Back and Home buttons too, because they sit
+     at z-index 20 and the band at 45, so they washed out under it. Controls go
+     above the band, content stays under it. */
+  .topbar{z-index:50}
+}
+
+/* ============================================================
+   CARD IMAGERY
+   Covers and thumbnails bleed to the card edge — inset artwork inside a
+   bordered box reads as a placeholder, full bleed reads as the work.
+   ============================================================ */
+.card,.p{color:inherit;text-decoration:none}
+
+.p .cover,.card img.thumb{
+  display:block;height:auto;
+  border-radius:var(--r) var(--r) 0 0;border:0;border-bottom:1px solid var(--line);
+  object-fit:cover;background:var(--surface-2)}
+
+.card img.thumb{height:auto;display:block;place-items:unset;color:transparent;font-size:0}
+
+/* A project with no live site has no cover to capture. It keeps the same band
+   so the grid stays even, rather than one short card among the tall ones. */
+
+/* ============================================================
+   FAQ — animate the disclosure instead of snapping it open
+   ============================================================ */
+.faq details::details-content{block-size:0;overflow:hidden;interpolate-size:allow-keywords}
+.faq details[open]::details-content{block-size:auto}
+/* The row itself never takes a hover wash. The first FAQ indented rows and
+   washed them with a gradient, none of it behind @media (hover:hover), so a
+   tap latched the wash on and left it. State now lives entirely in the keycap
+   declared with .faq summary .x — hover wakes it, open inverts it — and the
+   row around it stays still. */
+
+/* Navigation: the current page and the hovered item share one sliding
+   highlight (polish block). 2px keeps the labels off the column's edge; the
+   polish block sets it as part of the link's padding. */
+
+/* The partner badge is a link to the real profile, so it needs link styling */
+.badge{text-decoration:none}
+.badge img{border-radius:var(--r-sm);flex:0 0 auto}
+
+/* Partner credentials: the supplied artwork in a transparent card with a
+   hairline border, the same in both themes. The artwork swaps between its
+   light and dark cuts (app.js, syncCredArt), so its type takes the ink. */
+/* --edge-control, not --line-2: the Lovable badge beside it in the sidebar is
+   a control and takes that edge, and in dark the two sat at 22% and 12% in a
+   single stack (Yar, 2026-10-29). */
+.cred{display:inline-flex;align-items:center;box-sizing:border-box;max-width:100%;min-height:56px;padding:var(--space-8) var(--space-16);
+  border:1px solid var(--edge-control);border-radius:var(--r-sm);text-decoration:none}
+.cred .cred-art{display:block;width:auto;height:36px}
+/* both cuts are in the page, so a theme change is a display switch, not a load */
+.cred .cred-art--dark{display:none}
+html[data-theme="dark"] .cred .cred-art--light{display:none}
+html[data-theme="dark"] .cred .cred-art--dark{display:block}
+.cred:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+.ctx .cred{width:auto;justify-self:start}
+
+/* ============================================================
+   TYPE — one rule per step, so line height and tracking travel with
+   the size instead of being set ad hoc at each call site.
+   ============================================================ */
+h1.display{line-height:.98;letter-spacing:-.035em}
+.ahead h1{line-height:1.04;letter-spacing:-.028em}
+h2{line-height:1.15;letter-spacing:-.02em}
+h3{line-height:1.25;letter-spacing:-.015em}
+.card h3{line-height:1.3;letter-spacing:-.012em}
+.lead{line-height:1.38;letter-spacing:-.016em}
+.sub{line-height:1.6}
+
+/* ============================================================
+   THE MARK AT SCALE
+   The Y is the only piece of brand this site owns. It appears once more,
+   very large and cropped by the viewport, as the hero's only ornament.
+   Decorative, so it is hidden from assistive tech and skipped in print.
+   ============================================================ */
+.heromark{
+  position:absolute;right:calc(var(--pad-x) * -1);top:50%;
+  translate:0 -50%;
+  width:min(42vw,520px);aspect-ratio:160/169;
+  background:var(--ink);opacity:.035;
+  -webkit-mask:url("/site/brand/mark-y.svg") center/contain no-repeat;
+          mask:url("/site/brand/mark-y.svg") center/contain no-repeat;
+  pointer-events:none;z-index:0;
+}
+html[data-theme="light"] .heromark{opacity:.05}
+.hero{position:relative}
+.hero > *:not(.heromark){position:relative;z-index:1}
+
+/* The mark used to re-anchor to the viewport on answer pages, as a watermark
+   behind the content. Yar called it out (2026-08-09): at reading widths it
+   crosses the answer columns and reads as a stray overlapping element, not a
+   watermark. On answer pages it is simply gone; the hero keeps it. */
+.heromark{transition:opacity .34s var(--ease)}
+body.leaving .heromark,body.returning .heromark{opacity:0}
+
+body.answered .hero{position:static}
+body.answered .heromark{display:none}
+/* content sits above the mark, which is the half that was actually missing */
+body.answered .answer{position:relative;z-index:1}
+
+@media (max-width:900px){.heromark{display:none}}
+@media print{.heromark{display:none}}
+
+/* ============================================================
+   LONG FORM
+   Articles are answer pages that keep going, so they reuse .abody and add
+   only what prose needs: a measure, a heading rhythm, and a table, because
+   the most useful thing this site publishes is a matrix of what was measured.
+   ============================================================ */
+/* Grid and flex items default to min-width:auto, so a wide <pre> or table
+   refuses to shrink and pushes the whole column past the viewport instead of
+   scrolling inside its own box. This is what min-width:0 is for. */
+.abody > *{min-width:0}
+.art{max-width:var(--w-prose);min-width:0}
+.art > *{min-width:0;max-width:100%}
+.art pre,.art .tablewrap{max-width:100%}
+.ahead h1{min-width:0}
+.art code{overflow-wrap:anywhere}
+.art > * + *{margin-top:var(--space-20)}
+.art h2{font-size:var(--t-h2);color:var(--ink);letter-spacing:-.02em;
+  margin-top:var(--space-48);text-wrap:balance}
+.art h3{font-size:var(--t-h3);color:var(--ink);letter-spacing:-.015em;margin-top:var(--space-32)}
+.art p{font-size:var(--t-body);line-height:1.72}
+.art strong{color:var(--ink);font-weight:600}
+.art a:not(.cta){color:var(--ink);border-bottom:1px solid var(--line-2)}
+
+.art ul,.art ol{padding-left:var(--space-24);display:grid;gap:var(--space-10)}
+.art li{font-size:var(--t-body);line-height:1.65}
+.art li::marker{color:var(--faint)}
+
+.art code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:1px var(--space-6);color:var(--ink)}
+.art pre{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:var(--space-16) var(--space-20);overflow-x:auto;font-size:var(--t-xs);line-height:1.6}
+.art pre code{background:none;border:0;padding:0;font-size:inherit;color:var(--muted)}
+
+.art blockquote{border-left:2px solid var(--line-2);padding-left:var(--space-20);color:var(--ink);
+  font-size:var(--t-lead);line-height:1.45;letter-spacing:-.014em}
+
+/* Wide tables scroll inside their own box; the page never scrolls sideways. */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);max-width:100%}
+.art table{border-collapse:collapse;width:100%;font-size:var(--t-sm);min-width:520px}
+.art th,.art td{text-align:left;padding:var(--space-12) var(--space-16);border-bottom:1px solid var(--line);vertical-align:top}
+.art thead th{color:var(--faint);background:var(--surface)}
+.art tbody tr:last-child td{border-bottom:0}
+.art td b{color:var(--ink);font-weight:600}
+/* Green is the booking colour and nothing else, so a "Yes" in a table is
+   carried by its word and its weight, the same as a "No". */
+.art .yes,.art .no{color:var(--ink);font-weight:600}
+
+.artmeta{display:flex;flex-wrap:wrap;gap:var(--space-20);color:var(--faint)}
+.artnote{font-size:var(--t-sm);line-height:1.6;color:var(--muted);
+  border-left:2px solid var(--line);padding-left:var(--space-16)}
+
+/* ============================================================
+   PRINT
+   body{overflow:hidden} and .stage{height:100dvh;overflow-y:auto} were never
+   reset, so every page printed as a single sheet holding one viewport: a
+   3362px article came out as one page. Pricing and process are exactly the
+   pages someone saves to send to a colleague.
+   ============================================================ */
+@media print{
+  html,body{height:auto;overflow:visible;background:#fff;color:#000}
+  .shell{display:block;height:auto}
+  .main{overflow:visible}
+  .stage{height:auto;max-height:none;overflow:visible;padding:0;transition:none}
+  body.answered .stage{height:auto;padding:0}
+  body.answered .wrap{display:block;min-height:0}
+  .side,.topbar,.navtoggle,.promptblock,.follows,.skiplink,.heromark{display:none!important}
+  .answer,.wrap{max-width:none;width:auto}
+  .art,.prose p{max-width:none}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:.8em;color:#555}
+  .card,.p,.fact,.step,pre,.tablewrap{break-inside:avoid;border:1px solid #ccc}
+  h1,h2,h3{break-after:avoid}
+  .cta{border:1px solid #000;color:#000;background:none}
+}
+
+/* ============================================================
+   WIDE CONTENT SCROLLS, AND NOW SAYS SO
+   A code block hid 187px of a curl command on a 1280 desktop and 573px of it
+   on a phone, cut mid-URL. On macOS the scrollbar is hidden until used, so
+   there was nothing at all to indicate the rest existed. The fade is painted
+   by the container and only appears while there is more to the right.
+   ============================================================ */
+.tablewrap,.art pre{
+  background-image:linear-gradient(to right,transparent calc(100% - 48px),var(--surface));
+  background-repeat:no-repeat;
+  background-attachment:local, scroll;
+  scrollbar-width:thin;
+  scrollbar-color:var(--line-2) transparent;
+}
+.tablewrap{background-color:var(--bg)}
+.art pre{background-color:var(--surface)}
+.tablewrap::-webkit-scrollbar,.art pre::-webkit-scrollbar{height:8px}
+.tablewrap::-webkit-scrollbar-thumb,.art pre::-webkit-scrollbar-thumb{
+  background:var(--line-2);border-radius:var(--r-sm)}
+
+/* A phone has no room for a 520px table, so let the code wrap rather than
+   asking someone to drag a 332px window across it. */
+@media (max-width:720px){
+  .art pre{white-space:pre-wrap;overflow-wrap:anywhere}
+  .art pre,.tablewrap{background-image:none}
+}
+
+/* ============================================================
+   SHORT VIEWPORTS
+   At 200% zoom on a 1280x800 laptop the viewport is 640x400 CSS px, and the
+   masking band plus the docked field took 112px of it, leaving a 288px window
+   to read a 1007px page through. Below that height the field returns to the
+   flow and the page gets its screen back.
+   ============================================================ */
+@media (max-height:560px){
+  body.answered .promptblock{position:static;padding:0;width:min(var(--w-field),100%);
+    display:block;pointer-events:auto;margin-bottom:var(--space-24)}
+  body.answered .promptblock::before{display:none}
+  /* the field leads the flow: below the 60px bar, clear of the answer */
+  body.answered .stage{height:auto;max-height:100dvh;padding-top:calc(60px + var(--space-12));padding-bottom:var(--space-24)}
+  .stage{transition:none}
+  /* a focused footer link stops clear of the theme key */
+  body.answered .foot a{scroll-margin-bottom:80px}
+}
+/* on a phone, 8px under the band (which ends 24px above --header-h) */
+@media (max-height:560px) and (max-width:720px){
+  body.answered .stage{padding-top:calc(var(--header-h) - var(--space-16))}
+}
+
+/* ============================================================
+   CHANGING THEME
+   The swap used to arrive in three speeds at once: the page and the headings
+   changed in one frame while the cards, chips, field and nav eased over 181 to
+   211ms, so the ground moved and the furniture caught up.
+
+   One clock instead, and only while the switch is actually being used. The
+   class is added by the toggle and removed when the transition ends, so the
+   theme never animates on load, which would otherwise turn a correct first
+   paint into a visible fade.
+   ============================================================ */
+/* BOOT — nothing transitions until the theme has settled.
+   The first paint uses the OS preference; app.js applies the saved theme just
+   after. Any colour transition started by that switch is left stranded holding
+   the pre-switch value, which rendered .chip and the footer links at 2.26:1 in
+   dark on a light-OS machine. See the matching comment in app.js. */
+html.booting, html.booting *, html.booting *::before, html.booting *::after{
+  transition:none !important;
+}
+
+html.theming, html.theming *, html.theming *::before, html.theming *::after{
+  transition:background-color .2s var(--ease),
+             border-color .2s var(--ease),
+             color .2s var(--ease),
+             fill .2s var(--ease) !important;
+}
+/* The rule above pins every transition to colours while a deliberate switch
+   settles — which would snap the sun/moon morph, and the morph runs exactly
+   then. The theme key is the one element whose theme switch IS its animation,
+   so its parts keep their transform/opacity transition. */
+html.theming .sm-core,html.theming .sm-rays,html.theming .sm-bite{
+  transition:transform .45s var(--ease),opacity .45s var(--ease) !important;
+}
+@media (prefers-reduced-motion:reduce){
+  html.theming, html.theming *{transition:none!important}
+  html.theming .sm-core,html.theming .sm-rays,html.theming .sm-bite{transition:none!important}
+}
+
+/* ============================================================
+   FOOTER
+   There was none. Every page simply ended, which left a reader with nowhere
+   to go and left the five profiles declared in Person.sameAs with no
+   corroborating link anywhere on the site, which is most of what makes a
+   sameAs claim count.
+
+   It sits outside .wrap, as the last child of the scrolling stage, so the
+   answered-state centring of .wrap is untouched and the footer lands below
+   the fold instead of floating under a vertically centred answer.
+
+   Hairlines and small labels, per the direction. No boxes, no shadow.
+   ============================================================ */
+.foot{border-top:1px solid var(--line)}
+/* The homepage's last .sec already ends with 56px of its own padding, so the
+   rule above the footer lands exactly where every other section rule does.
+   Answer pages have no sectioned tail, so the gap comes from here instead. */
+.footin{max-width:var(--w-page);margin:0 auto}
+.footcol{display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-2)}
+.footcol h2{margin-bottom:var(--space-10)}
+.footcol a{font-size:var(--t-sm);color:var(--muted);padding:var(--space-4) 0;border-bottom:1px solid transparent}
+/* One section gap above it, the same 96px the rest of the page uses. */
+
+/* ---------------- /ask ----------------
+   The unmatched-question page lists every answer as real markup, so it is
+   useful with JavaScript off, where it is also where the ask form posts. */
+.asklist{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:var(--space-2) var(--space-32);margin-top:var(--space-12)}
+.asklist a{font-size:var(--t-sm);color:var(--muted);padding:var(--space-4) 0;border-bottom:1px solid transparent}
+
+@media print{.foot{display:none}}
+
+/* The AVIF sources put the images inside a <picture>, which then becomes the
+   flex item in .card and .p. It carries no styling of its own — the negative
+   full-bleed margins stay on the <img>, where they were. */
+.card picture,.p picture{display:block;min-width:0}
+
+/* Honeypot: off-screen for everyone, including screen readers (aria-hidden). */
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+/* AI fallback block on the ask page */
+/* The AI answer leads the ask page, directly under the "not written yet"
+   line, so every piece gets real air: answer, then the related-page chip,
+   then the handoff row, none of them touching. */
+.ai-block{margin:2px 0 22px}
+.ai-block .ai-answer{margin:0 0 12px}
+.ai-block > .chip{display:inline-block;margin:0 0 14px}
+/* a colour, not opacity: muted at .72 was 3.79:1 on the light page */
+.ai-block .ai-lead{margin:0 0 10px;color:var(--faint)}
+/* The field takes a couple of seconds to answer. While it does, the
+   "Thinking" label above the title shimmers (polish block) and nothing else
+   moves; this line only holds the place where the answer will land. */
+.ai-block .thinking{display:flex;align-items:center;min-height:20px}
+.ai-block .llm-links{display:flex;flex-wrap:wrap;gap:var(--space-8)}
+
+/* ---------------- /cv print ----------------
+   Save-as-PDF from /cv yields the one-pager: chrome off, ink on paper.
+   The reveal transforms must be neutralised or a mid-animation state prints. */
+@media print{
+  .side,.navtoggle,.topbar,.hero,.follows,.cta,.skiplink{display:none!important}
+  body,body.answered{background:#fff;color:#111}
+  .shell{display:block}
+  .answer .b{opacity:1;transform:none}
+  .answer.reveal .hr{transform:scaleX(1)}
+  .abody a{border-bottom:none;color:#111}
+}
+
+/* ============================================================
+   HOMEPAGE AND ANSWER PAGE ADDITIONS, 2026-10-02
+   New pieces of the homepage and the answer pages, set in the
+   dashboard's own language: hairlines, tracked micro-labels, left
+   alignment.
+   ============================================================ */
+
+/* One colour for one action. The booking button takes the availability
+   green, so green means "book a call". The sidebar's booking link carries it
+   only on its dot, so a view shows one green fill. */
+/* Hover brightens in both themes: 8.6:1 on the dark green, 5.0:1 for the
+   light text on the light theme's hover green. */
+:root{--cta:#3FB27F;--cta-ink:#06140D;--cta-hover:#57C291}
+html[data-theme="light"]{--cta:#0B7647;--cta-ink:#FBFBFA;--cta-hover:#177C50}
+@media (prefers-color-scheme:light){
+  html:not([data-theme="dark"]):not([data-theme="light"]){--cta:#0B7647;--cta-ink:#FBFBFA;--cta-hover:#177C50}
+}
+.cta{background:var(--cta);color:var(--cta-ink)}
+
+/* Proof: the real site first, full bleed like the project covers,
+   then which problem it solved, then who it was for. */
+.proof picture{display:block}
+.proof .shot{display:block;width:100%;height:auto;aspect-ratio:900/472;object-fit:cover;
+  border-radius:var(--r) var(--r) 0 0;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.proof .fixes{font-size:var(--t-xs);font-weight:500;color:var(--ink);margin-bottom:var(--space-6)}
+.proof .k a{border-bottom:1px solid var(--line-2)}
+.proofcred{margin-bottom:var(--space-12)}
+.fact .alink{display:inline-block;margin-top:var(--space-4)}
+
+/* Push: the reply note under the button */
+.push .ctarow{flex-direction:column;align-items:flex-start;gap:var(--space-12)}
+
+/* Services and process: the stage or service name above its outcome */
+.step .k{display:block;margin-bottom:var(--space-6)}
+.afoot .ctaproof{display:block}
+
+/* ---------- fixes that hold in any layout ---------- */
+code,kbd,samp{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.p h2,.p h3{font-size:var(--t-h3);color:var(--ink);letter-spacing:-.018em}
+.field input{text-overflow:ellipsis}
+.art td code,.art :not(pre) > code{white-space:nowrap;overflow-wrap:normal}
+.abody :not(pre) > code:not(.art code){font-size:.88em;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:var(--r-sm);padding:1px var(--space-6);color:var(--ink);white-space:nowrap}
+@media (max-width:520px){
+  .ahead{flex-direction:column;align-items:flex-start;gap:var(--space-12)}
+  .ahead h1{flex:none;width:100%}
+  .ahead .tag{order:-1}
+  .tside pre{white-space:pre-wrap;overflow-wrap:anywhere}
+  .follows .l{flex-basis:100%;margin:0 0 var(--space-2)}
+  .art table{min-width:0}
+  .art thead{display:none}
+  .art tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--space-16);row-gap:var(--space-6);padding:var(--space-12) var(--space-16);border-bottom:1px solid var(--line)}
+  .art tbody tr:last-child{border-bottom:0}
+  .art tbody td{padding:0;border:0}
+  .art tbody td:last-child{grid-column:1/-1;color:var(--muted)}
+}
+
+/* ---------- the theme key, docked in the corner ----------
+   One square key, fixed bottom right on every page and always in reach,
+   the way a status control sits on an instrument. It flips light and dark;
+   a first visit still follows the OS until the key is pressed.
+   bottom:42px centres the 44px key on the docked ask field (60px tall, 34px
+   off the bottom), so on answer pages the two read as one row. Where the
+   field would reach the key, below 1140px, the field gives up the corner. */
+.themedock{position:fixed;right:var(--space-20);bottom:42px;z-index:35}
+.themedock .themer{width:44px;height:44px;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink)}
+@media (max-width:1140px) and (min-height:561px){body.answered .promptblock{padding-right:calc(var(--space-20) + 44px + var(--space-12))}}
+@media (max-width:720px){.themedock{right:var(--space-16)}}
+/* A phone's homepage has no docked field for the key to sit level with, and
+   in the corner it covered the hero's send key at in-browser heights (390x664
+   is an iPhone with Safari's toolbar showing). It rests in the top band there
+   instead, mirroring the menu button, and travels down with the field when an
+   answer docks it (flip() in app.js moves both). */
+@media (max-width:720px){body:not(.answered) .themedock{top:var(--space-12);bottom:auto;z-index:50}}
+/* beside the menu button it takes the button's flat style and press */
+@media (max-width:720px){
+  body:not(.answered) .themedock .themer{border-color:var(--edge-control);background-color:var(--surface);box-shadow:var(--depth);
+    transition:border-color var(--dur-hover) var(--ease),box-shadow var(--dur-press) var(--ease),scale var(--dur-press) var(--ease)}
+  body:not(.answered) .themedock .themer:active{translate:none;scale:.97;box-shadow:var(--depth)}
+}
+@media (max-width:720px) and (prefers-reduced-motion:reduce){body:not(.answered) .themedock .themer:active{scale:none}}
+/* Windows 721-1140px wide: in the corner the key covered the hero's chips
+   on short windows and, from 2026-10-13, the hero's card and figures, which
+   stack across the full width there and run under the corner at most
+   heights. On the homepage it rests top right, as on a phone; flip() carries
+   it down when an answer opens. (Wider windows: see the end of the HERO
+   block.) */
+/* 721-1140px: the hero stacks full-width there and runs under the corner at
+   most heights, so the key lifts to the top band (2026-10-13, still true).
+   From 1141px the key keeps its bottom-right home; the retired 1141-1587px
+   lift was for the old reel's corner caption, gone with that reel. */
+@media (min-width:721px) and (max-width:1140px){
+  body:not(.answered) .themedock{top:var(--space-12);bottom:auto}
+}
+@media (max-width:720px) and (min-height:561px){
+  body.answered .promptblock{padding-left:var(--space-16);padding-right:calc(var(--space-16) + 44px + var(--space-8))}}
+/* visibility too, so Tab skips the hidden key */
+body.nav-open .themedock{opacity:0;pointer-events:none;visibility:hidden}
+@media print{.themedock{display:none}}
+/* the redeploy cover carries a 1px light frame in the file itself */
+.shot[src*="redeploy"]{object-view-box:inset(1px)}
+
+/* ============================================================
+   THE HOMEPAGE SECTIONS, 2026-10-02
+   Statements that carry each part of the pitch, a client wall, a
+   track record, featured work on a sideways strip, service tiles with
+   tags, a large closing call, a split FAQ and a footer that ends on the
+   wordmark. All copy is Yar's own and every figure is on record.
+   ============================================================ */
+.statement{line-height:1.1;letter-spacing:-.028em;color:var(--ink);
+  max-width:24ch;text-wrap:balance;margin:0}
+.statement em{font-style:normal;color:var(--faint)}
+/* the reveal arms itself only once app.js has split the words */
+/* Unlit words wait in --faint, not --line-2: the hairline grey measured 1.9:1
+   in dark and 1.7:1 in light, under the 3:1 large text needs, and the last
+   fifth of a statement is still unlit when it sits mid-screen. */
+html.split .statement .w{color:var(--faint);transition:color .35s var(--ease)}
+html.split .statement .w.on{color:var(--ink)}
+html.split .statement em .w.on{color:var(--faint)}
+.stmtnote{margin:var(--space-32) 0 0 clamp(0px,32%,380px);max-width:40ch;font-size:var(--t-sm);line-height:1.6;color:var(--muted)}
+.stmt > .alink{display:inline-block;margin-top:var(--space-32)}
+
+.kicker{margin-bottom:var(--space-20)}
+
+/* client wall: one frame per client, the last cell leads to the work. Since
+   2026-10-12 the frames sit on the homepage's shared 24px column gap and are
+   drawn like the credential cards and featured work: surface, a 1px edge
+   and card corners. Before, the wall was one box split by 1px hairlines. */
+.clientwall{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-24)}
+.clientwall li{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.clientwall a{display:flex;align-items:center;justify-content:center;text-align:center;min-height:96px;padding:var(--space-16);
+  font-size:var(--t-body);font-weight:600;letter-spacing:-.01em;color:var(--muted);transition:color .2s var(--ease),background .2s var(--ease)}
+.clientwall .more a{font-size:var(--t-xs);font-weight:500;color:var(--ink);gap:var(--space-8)}
+.clientwall .more a::after{content:"\2192";transition:transform .2s var(--ease)}
+@media (max-width:1080px){.clientwall{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.clientwall{grid-template-columns:repeat(2,minmax(0,1fr))}.clientwall a{min-height:72px;font-size:var(--t-sm)}}
+
+/* track record: the three facts behind the figures, which sit in the hero
+   since 2026-10-13 */
+.record .proofcred{margin-top:0}
+
+/* featured work: the four proof panels on one sideways strip */
+.workhead{display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-24);margin-bottom:var(--space-12)}
+.work h2{line-height:1.05;letter-spacing:-.03em;margin:0}
+.proofs.strip{display:flex;gap:var(--space-16);overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;
+  scrollbar-width:none;padding-bottom:var(--space-4)}
+.proofs.strip::-webkit-scrollbar{display:none}
+.proofs.strip > .proof{flex:0 0 min(520px,84%);scroll-snap-align:start}
+.proofs.strip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+/* On a phone the second card's link sat 12px inside the strip's edge, so a Tab
+   to it counted as already in view and the strip never moved. While the
+   keyboard is inside the strip, its ends keep 16px clear: the half-hidden link
+   counts as hidden, and the strip snaps its card in. */
+.proofs.strip:has(:focus-visible){scroll-padding-inline:var(--space-16)}
+.stripbar{height:2px;background:var(--line);margin-top:var(--space-20);border-radius:2px;overflow:hidden}
+.stripbar i{display:block;height:100%;width:var(--w,40%);background:var(--ink);border-radius:2px;
+  transform:translateX(var(--x,0));transition:transform .12s linear}
+
+/* services: six tiles, each with what it gets you and what it covers */
+.svcs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-40) var(--space-24)}
+.svc{border-top:1px solid var(--line-2);padding-top:var(--space-16);display:flex;flex-direction:column;gap:var(--space-8)}
+.svc h3{font-size:var(--t-h4);color:var(--ink);letter-spacing:-.012em}
+.svc p{line-height:1.55}
+.tags{list-style:none;margin:var(--space-4) 0 0;padding:0;display:flex;flex-wrap:wrap;gap:var(--space-6)}
+.tags li{border:1px solid var(--line);border-radius:var(--r-pill)}
+@media (max-width:1080px){.svcs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.svcs{grid-template-columns:1fr;gap:var(--space-32)}}
+
+/* the closing call: the largest line on the page after the hero */
+.bigcta h2{line-height:1.02;letter-spacing:-.035em;max-width:16ch;margin-bottom:var(--space-20)}
+.bigcta .lede{max-width:52ch}
+
+/* FAQ: the heading in the first of three equal columns, the questions across
+   the other two, on the shared 24px column gap (2026-10-12) */
+.faqsplit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+.faqsplit > .faq{grid-column:span 2}
+.faqside{position:sticky;top:var(--space-32);display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-16)}
+.faqside h2{line-height:1;letter-spacing:-.035em;margin:0}
+@media (max-width:1080px){.faqsplit{grid-template-columns:minmax(0,1fr)}.faqsplit > .faq{grid-column:auto}.faqside{position:static}}
+
+/* footer: the booking line on top, the wordmark across the bottom */
+.footcta{display:flex;align-items:center;justify-content:space-between;gap:var(--space-24);max-width:620px;
+  padding-bottom:var(--space-12);margin-bottom:var(--space-56);border-bottom:1px solid var(--ink);
+  font-weight:500;letter-spacing:-.025em;line-height:1.15;color:var(--ink)}
+.footcta svg{width:.9em;height:.9em;flex:none}
+@media (max-width:720px){.stmtnote{margin-left:0}.workhead{flex-wrap:wrap}}
+/* Statements read as one block on one left edge: the line under the
+   statement starts where the statement starts (Yar, 2026-10-03; the
+   offset note floated against nothing). */
+.statement{line-height:1.04;letter-spacing:-.035em;max-width:20ch}
+.stmtnote{margin:var(--space-32) 0 0;max-width:46ch;font-size:var(--t-body);line-height:1.6}
+.stmt-creds{display:flex;flex-wrap:wrap;gap:var(--space-12);list-style:none;margin:var(--space-24) 0 0;padding:0}
+.stmt-creds .cred .cred-art{height:40px}
+
+/* ============================================================
+   INNER PAGES AND FOOTER, IN THE REFERENCE STRUCTURE, 2026-10-03
+   ============================================================ */
+:root{--f-mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace}
+
+/* Answer header: the page's label sits above its title, the title is big */
+.ahead{flex-direction:column;align-items:flex-start;gap:var(--space-12)}
+.ahead .tag{order:-1;background:none;border:0;padding:0;border-radius:0;font-family:var(--f-mono)}
+.ahead h1{line-height:1.02;letter-spacing:-.035em;max-width:20ch}
+
+/* Services: what is included, the heading and lead on the left, six tiles on hairlines */
+.incl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:var(--space-32) var(--space-56);align-items:start}
+.inclside{position:sticky;top:var(--space-32)}
+.inclside .lead{font-size:var(--t-lead)}
+.steps--grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border-top:1px solid var(--line)}
+.steps--grid .step{background:none;border:0;border-radius:0;border-bottom:1px solid var(--line);padding:var(--space-24) var(--space-24) var(--space-24) 0;
+  grid-template-columns:1fr;gap:var(--space-8)}
+.steps--grid .step:nth-child(odd){border-right:1px solid var(--line)}
+.steps--grid .step:nth-child(even){padding-left:var(--space-24);padding-right:0}
+.steps--grid .step .n{display:none}
+.steps--grid .step h2{font-size:var(--t-h4);margin-bottom:var(--space-8)}
+.steps--grid .step p{max-width:none}
+@media (max-width:1080px){.incl{grid-template-columns:1fr}.inclside{position:static}}
+@media (max-width:640px){.steps--grid{grid-template-columns:1fr}
+  /* odd included: its desktop divider rule outranks a bare .step, which left
+     a stray line down the right of every other tile on a phone */
+  .steps--grid .step,.steps--grid .step:nth-child(even),.steps--grid .step:nth-child(odd){padding:var(--space-20) 0;border-right:0}}
+
+/* Process: one vertical line with numbered stations */
+.steps--timeline{display:grid;gap:0;position:relative;padding-left:0}
+.steps--timeline .step{background:none;border:0;border-radius:0;padding:0 0 var(--space-40);grid-template-columns:44px 1fr;gap:var(--space-20);position:relative}
+/* from the station's bottom edge; at 36px it drew a stub inside each circle */
+.steps--timeline .step::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:1px;background:var(--line-2)}
+.steps--timeline .step:last-child{padding-bottom:0}
+.steps--timeline .step:last-child::before{display:none}
+.steps--timeline .step .n{width:44px;height:44px;border-radius:50%;background:var(--bg);color:var(--ink);border:1px solid var(--line-2);font-family:var(--f-mono);font-weight:500;font-size:var(--t-xs)}
+.steps--timeline .step h2{font-size:var(--t-h3)}
+
+/* Projects: one row per site, the way a work index reads */
+.pgrid:has(> .p:nth-child(5)){grid-template-columns:1fr;gap:0;border-top:1px solid var(--line)}
+.pgrid:has(> .p:nth-child(5)) > .p{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr) minmax(0,220px);grid-template-rows:auto 1fr;
+  column-gap:var(--space-32);row-gap:var(--space-8);align-items:start;background:none;border:0;border-radius:0;
+  border-bottom:1px solid var(--line);padding:var(--space-24) 0}
+.pgrid:has(> .p:nth-child(5)) > .p > picture{grid-column:1;grid-row:1 / span 2}
+.pgrid:has(> .p:nth-child(5)) > .p .cover{width:100%;margin:0;border-radius:var(--r-sm);border:1px solid var(--line)}
+.pgrid:has(> .p:nth-child(5)) > .p h3{grid-column:2;grid-row:1;letter-spacing:-.02em}
+.pgrid:has(> .p:nth-child(5)) > .p p{grid-column:2;grid-row:2;max-width:46ch}
+.pgrid:has(> .p:nth-child(5)) > .p .top{grid-column:3;grid-row:1 / span 2;flex-direction:column;gap:var(--space-6);font-family:var(--f-mono);justify-content:flex-start}
+@media (max-width:900px){
+  .pgrid:has(> .p:nth-child(5)) > .p{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+  .pgrid:has(> .p:nth-child(5)) > .p > picture,.pgrid:has(> .p:nth-child(5)) > .p h3,.pgrid:has(> .p:nth-child(5)) > .p p,.pgrid:has(> .p:nth-child(5)) > .p .top{grid-column:1;grid-row:auto}
+  .pgrid:has(> .p:nth-child(5)) > .p .top{flex-direction:row;flex-wrap:wrap;gap:var(--space-12)}
+}
+/* From 901 to 1240px the title track of the three-track row was 73 to 300px
+   wide, and the uppercase names ran into the meta column. In that range the
+   meta line moves above the title, in the order the phone layout uses. */
+@media (min-width:901px) and (max-width:1240px){
+  .pgrid:has(> .p:nth-child(5)) > .p{grid-template-columns:minmax(0,240px) minmax(0,1fr);grid-template-rows:auto auto 1fr}
+  .pgrid:has(> .p:nth-child(5)) > .p > picture{grid-column:1;grid-row:1 / span 3}
+  .pgrid:has(> .p:nth-child(5)) > .p .top{grid-column:2;grid-row:1;flex-direction:row;flex-wrap:wrap;gap:var(--space-12)}
+  .pgrid:has(> .p:nth-child(5)) > .p h3{grid-column:2;grid-row:2}
+  .pgrid:has(> .p:nth-child(5)) > .p p{grid-column:2;grid-row:3}
+}
+
+/* Footer: booking line and link columns, a base row in mono, then the name */
+.footin{container-type:inline-size;padding-bottom:0}
+.foottop{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);align-items:start}
+.foottop .footcta{margin-bottom:0;align-self:end}
+.footnav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-32) var(--space-24)}
+.footnav .footcol a{font-size:var(--t-body);color:var(--ink);padding:var(--space-2) 0}
+.footcol h2{font-family:var(--f-mono)}
+.footbase{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-24);align-items:end;font-family:var(--f-mono)}
+/* The wordmark's glyphs rise 30px above its .8 line box and hit-tested over the
+   base row's last links, so a click on their lower half did nothing. */
+.footbase{position:relative;z-index:1}
+.fb{display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-6)}
+.fb a{color:var(--muted)}
+.fb .badge{font-family:var(--font);text-transform:none;letter-spacing:0;font-size:var(--t-xs);margin-bottom:var(--space-6)}
+.fb-social{display:grid;grid-template-columns:repeat(2,max-content);gap:var(--space-6) var(--space-24)}
+.fbl{color:var(--faint)}
+.aiask{display:flex;flex-wrap:wrap;gap:var(--space-6) var(--space-12)}
+.footname{margin:var(--space-24) 0 0;line-height:.8;font-weight:800;letter-spacing:-.06em;white-space:nowrap;
+  color:color-mix(in srgb,var(--ink) 70%,var(--bg));padding-bottom:.06em;user-select:none}
+@media (max-width:1080px){
+  .foottop{grid-template-columns:1fr}
+  .footbase{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-32) var(--space-24);align-items:start}
+}
+@media (max-width:640px){
+  .footnav{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .footnav .footcol:last-child{grid-column:1/-1}
+  .footbase{grid-template-columns:1fr}
+}
+@media print{.footname{display:none}}
+.sec .kicker{margin-bottom:var(--space-20)}
+/* Framed clients: the name, then who they are in one line. Every line is
+   sourced in the repo's client framing notes. */
+.clientwall.framed{grid-template-columns:repeat(3,minmax(0,1fr))}
+.clientwall.framed a{flex-direction:column;align-items:flex-start;justify-content:flex-start;text-align:left;gap:var(--space-8);
+  min-height:0;height:100%;padding:var(--space-24)}
+.clientwall.framed b{font-size:var(--t-h4);color:var(--ink);letter-spacing:-.015em}
+.clientwall.framed span{font-weight:400;line-height:1.5;color:var(--muted);letter-spacing:0}
+/* The last cell leads to the work. As a frame it read as a twelfth client
+   with its content missing, so it has none (2026-10-13): the link starts
+   on the column line, level with the names in its row. */
+.clientwall.framed li.more{background:none;border-color:transparent;overflow:visible}
+.clientwall.framed .more a{flex-direction:row;align-items:center;justify-content:flex-start;
+  width:max-content;height:auto;padding:0;margin-top:var(--space-24)}
+/* where there is no cursor it keeps a 44px touch height, its words where
+   they are */
+@media (pointer:coarse){.clientwall.framed .more a{padding-block:var(--space-12);margin-top:var(--space-12)}}
+@media (max-width:1080px){.clientwall.framed{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.clientwall.framed{grid-template-columns:1fr}}
+.sec .statement{line-height:1.04;letter-spacing:-.035em;max-width:20ch;margin:0}
+.footname{letter-spacing:-.035em;margin-bottom:var(--space-24)}
+/* A client whose live site is no longer my build keeps its cell, unlinked */
+
+/* ============================================================
+   VISUAL POLISH, 2026-10-04
+   Every section stays where it was and every word stays the same. This
+   block changes how things look and answer the pointer: weights, labels,
+   warm neutrals, depth per theme, three radii, the controls, the cards,
+   the links, focus, motion and fluid sizing. The reasoning, component by
+   component, is in docs/superpowers/specs/2026-10-04-ui-polish-research.md.
+
+   Kept out on purpose: glows, glass and backdrop blur, grain, custom
+   cursors, magnetic buttons, count-up numbers, scroll-in fades, springs
+   that bounce and sparkle icons. One exception by Yar's request
+   (2026-10-29): the sidebar Contact dot glows inside itself and breathes
+   slowly, with no halo. No transition lists "all";
+   hover lives behind (hover:hover) and (pointer:fine); reduced motion
+   turns every movement here off.
+   ============================================================ */
+
+/* ---------- tokens ---------- */
+:root{
+  /* Weights the variable font now reaches, one per role since 2026-10-12:
+     a page's H1 at 650; every heading, figure and button under it at 590;
+     nav and labels at 500; body at 400. */
+  --fw-display:650;
+  --fw-heading:590;
+  --fw-label:500;
+
+  /* Durations on the one curve (--ease). Press confirms a touch, so it is
+     the quickest; a panel moves the most, so it is the slowest. */
+  --dur-press:120ms;
+  --dur-hover:160ms;
+  --dur-panel:220ms;
+
+  /* Running text inside cards and sections: the body step, 18. */
+  --t-copy:var(--t-body);
+
+  /* Fluid vertical rhythm. The phone value at 360px, the desktop value
+     from 1280px up, a straight line between. */
+  --sp-96:clamp(4rem, 3.217rem + 3.478vw, 6rem);
+  --sp-80:clamp(3.5rem, 2.913rem + 2.609vw, 5rem);
+  --sp-64:clamp(3rem, 2.609rem + 1.739vw, 4rem);
+  --sp-56:clamp(2.5rem, 2.109rem + 1.739vw, 3.5rem);
+  --sp-48:clamp(2.25rem, 1.957rem + 1.304vw, 3rem);
+
+  /* DEPTH. Flat since 2026-10-12: a surface is told apart by its 1px edge
+     and its fill, never by a shadow (docs/DIRECTION.md). The tokens stay so
+     every rule that reads them gets none. light-dark() reads the
+     color-scheme the theme rules above set on <html>, so each token below
+     holds both themes in one declaration.
+     The ring is the element's existing 1px border, recoloured, so no box
+     changes size and a hover that strengthens it moves nothing. */
+  --ring:light-dark(rgb(0 0 0 / .075), rgb(255 255 255 / .08));
+  --ring-hover:light-dark(rgb(0 0 0 / .14), rgb(255 255 255 / .14));
+  --depth:none;
+  --depth-hover:none;
+  /* The chrome controls (the topbar keys, the menu key, the badge and the
+     theme key) lost the shadow that drew their edge, and the 7.5% ring
+     alone measured 1.09:1 on the light page. They share one stronger edge:
+     22% in light, as the docked field draws it (1.56:1), and 12% in dark
+     (1.50:1, what the shadow gave them before 2026-10-12). */
+  --edge-control:light-dark(rgb(0 0 0 / .22), rgb(255 255 255 / .12));
+  --edge-control-hover:light-dark(rgb(0 0 0 / .34), rgb(255 255 255 / .2));
+  /* hairlines that structure a grid rather than separate sections */
+  --line-soft:light-dark(rgb(0 0 0 / .085), rgb(255 255 255 / .075));
+  /* a quiet fill for chips, tags and the sidebar highlight */
+  --tint:light-dark(rgb(0 0 0 / .035), rgb(255 255 255 / .045));
+  --tint-2:light-dark(rgb(0 0 0 / .06), rgb(255 255 255 / .08));
+  /* the inner outline on screenshots, so a white or black page never
+     bleeds into the card around it */
+  --img-ring:light-dark(rgb(0 0 0 / .1), rgb(255 255 255 / .1));
+  /* keycaps: the "/" hint and the FAQ key. A face and a ring, with no lip
+     or highlight drawn on them. The theme key shares the face and takes
+     --edge-control. */
+  --key-face:light-dark(var(--surface), var(--surface-2));
+  --key-ring:light-dark(rgb(0 0 0 / .12), rgb(255 255 255 / .1));
+  --key-depth:none;
+  --key-depth-in:none;
+  /* the booking button's edge: its own green, a step darker */
+  --cta-edge:color-mix(in oklab, var(--cta) 74%, #000);
+  /* focus: one ring everywhere, in ink, with a gap */
+  --focus:var(--ink);
+  /* The edge of a text field. WCAG 1.4.11 asks 3:1 for an input's boundary;
+     --line-2 measured 1.7 to 1.9. These clear 3:1 against the page and the
+     field's own fill in both themes (3.06 to 3.56). */
+  --field-edge:light-dark(rgb(0 0 0 / .45), rgb(255 255 255 / .36));
+  --field-edge-hover:light-dark(rgb(0 0 0 / .6), rgb(255 255 255 / .5));
+  --nav-row:48px;
+}
+
+/* ---------- type ---------- */
+/* Weights between the stock 400 and 700: a page's H1 at 650, every heading
+   under it at 590. Sizes are the fluid steps from the token block; the
+   statements, the closing call and the section titles take theirs in the
+   SECTIONS block. */
+h1.display{font-weight:var(--fw-display)}
+.ahead h1{font-size:var(--t-h1);font-weight:var(--fw-display)}
+.sec h2,.art h2,.p h2,.p h3,.art h3,.step h2,.step h3,.prob h3,.proof h3,.card h3,.svc h3,
+.clientwall.framed b{font-weight:var(--fw-heading)}
+.sec .statement{font-weight:var(--fw-heading)}
+/* the footer's booking line sits at the section-title step */
+.footcta{font-size:var(--t-section);font-weight:var(--fw-heading)}
+.pgrid:has(> .p:nth-child(5)) > .p h3{font-size:clamp(1.375rem, .5rem + 1.613vw, 1.875rem);font-weight:var(--fw-heading)}
+/* An open FAQ question keeps its weight: at 590 a one-line question broke to
+   two lines as it opened. The inverted key already marks the open row. */
+.byname{font-weight:var(--fw-heading)}
+/* The short-window variant of the display size, rem-based like the rest. */
+@media (min-width:721px) and (max-height:820px){:root{--t-display:clamp(2.875rem, .5rem + 4.996vw, 4.625rem)}}
+/* The footer wordmark now renders at the 800 it always asked for, which is
+   2.7% wider than the 700 it was clamped to, so it is re-fitted to span the
+   footer exactly. */
+.footname{font-size:15.7cqi}
+
+/* Running text in cards and sections at 16px, the body floor. Controls and
+   link lists stay at 15, captions at 13. */
+.sec .lede,.prob p,.proof p,.proofcred p,.bridge,.step p,.steps--grid .step p,.toollede,.faq .a,
+.tmain p,.tmain .fl li,.p p,.svc p,.clientwall.framed span,
+.fact .fl li,.row .t small,.artnote,.getrow input[type=email],.getdone,.card p,.tside .note,.getstatus{font-size:var(--t-copy)}
+.bigcta .lede{font-size:var(--t-body)}
+/* card titles and FAQ questions: the one card-title step, --t-h4, a step
+   over their 16px copy at every width */
+.prob h3,.proof h3,.step h3,.step h2,.card h3,.faq summary{font-size:var(--t-h4)}
+/* the last two stock bolds */
+.step .n{font-weight:var(--fw-heading)}
+.prose strong{font-weight:600;color:var(--ink)}
+
+/* Figures that sit in columns line up digit for digit: numbering, the year
+   column on /projects, row metadata. The font carries tnum. Everything else
+   keeps proportional figures, because a tabular 1 opens a gap: "Within 1 2
+   hours" in a sentence, "11 of 16" in a table cell, "20 1 9" in a stat figure
+   that never sits in a column. */
+.p .top,.svc .n,.step .n,.proof .k,.proof .fixes,.src,.footbase,
+.row .m,.row .r{font-variant-numeric:tabular-nums}
+
+/* THE LABEL. Sentence case at 13px in the faint grey, weight 500, no
+   tracking. It replaces the 11.5px tracked capitals, a look that now reads
+   as a template default. The words are the ones in the markup; only the
+   case transform is gone. Text runs in three inks, ink, muted and faint:
+   the label grey that sat between the last two folded into faint on
+   2026-10-12. */
+.kicker,.sec .kicker,.proof .k,.proofcred .k,.fact .k,.tside .k,.step .k,
+.meta,.src,.ahead .tag,.card .meta,.p .top,.row .m,.row .r,.follows .l,.artmeta,.art thead th,
+.footcol h2,.footbase,.svc .n,.card .thumb{
+  font-size:var(--t-micro);letter-spacing:0;text-transform:none;font-weight:var(--fw-label);
+  line-height:1.4;color:var(--faint)}
+.footbase{color:var(--muted)}
+/* One face too: these kept the reference pass's mono beside sans labels on
+   the same page. The footer's base row stays the one mono line. */
+.ahead .tag,.footcol h2,.pgrid:has(> .p:nth-child(5)) > .p .top{font-family:var(--font)}
+.fbl{color:var(--faint)}
+
+/* Fluid rhythm between sections: the same gaps on a desktop, tighter on a
+   phone, with no jump at a breakpoint. */
+.sec{padding:var(--sp-56) 0}
+.sec.stmt{padding:var(--sp-96) 0 var(--sp-56)}
+.stmt .probs,.stmt .svcs{margin-top:var(--sp-56)}
+.sec.bigcta{padding:var(--sp-96) 0 var(--sp-80)}
+.faqsplit{gap:var(--space-32) var(--space-24)}
+body.answered .foot{margin-top:var(--sp-56)}
+.footin{padding-top:var(--sp-56)}
+.foottop{gap:var(--sp-48)}
+.footbase{margin-top:var(--sp-96)}
+.hero{padding-bottom:clamp(3rem, 6dvh, 5rem)}
+
+/* ---------- the booking button ---------- */
+/* It reads as a button by its fill and a 1px edge one step darker than its
+   own green, with no highlight or shadow (flat since 2026-10-12). Hover
+   brightens it; a press settles it to 97%. The label sits a pixel high in
+   its box, because lower-case text centres its ink below the middle of the
+   line. */
+.cta{border-radius:var(--r-sm);font-weight:var(--fw-heading);
+  padding:calc(var(--space-16) - 1px) var(--space-20) calc(var(--space-16) + 1px);
+  box-shadow:0 0 0 1px var(--cta-edge);
+  transition:background-color var(--dur-hover) var(--ease),scale var(--dur-press) var(--ease)}
+/* Green means booking. A .cta that goes anywhere else (a download, a
+   video, the contact page) takes the inverted ink instead, with the same
+   edge and press. */
+.cta:not([data-cal-link]):not(.ghost){background-color:var(--action);color:var(--action-ink);
+  box-shadow:0 0 0 1px color-mix(in oklab, var(--action) 82%, #000)}
+/* The secondary button keeps its outline and its own box. */
+.cta.ghost{padding:calc(var(--space-16) - 2px) calc(var(--space-20) - 1px) var(--space-16);
+  border-color:var(--ring);box-shadow:var(--depth)}
+
+/* The sidebar's booking link: muted text at the nav's 15px beside the green
+   dot, ink on hover, a dot that holds still. At the 13px label size it read
+   as a caption over the badge, and on /projects it is the only booking
+   control in view (2026-10-13). */
+.pill{font-size:var(--t-sm);font-weight:var(--fw-label);color:var(--muted);
+  transition:color var(--dur-hover) var(--ease)}
+
+/* ---------- controls: one depth, one radius ---------- */
+.topbar button,.badge,.navtoggle,.go{border-radius:var(--r-sm)}
+.topbar button,.badge,.navtoggle{border-color:var(--edge-control);background-color:var(--surface);box-shadow:var(--depth);
+  transition:color var(--dur-hover) var(--ease),border-color var(--dur-hover) var(--ease),
+             box-shadow var(--dur-hover) var(--ease),background-color var(--dur-hover) var(--ease),
+             scale var(--dur-press) var(--ease)}
+.navtoggle{transition:border-color var(--dur-hover) var(--ease),box-shadow var(--dur-hover) var(--ease),
+             transform var(--dur-panel) var(--ease),scale var(--dur-press) var(--ease)}
+.go{transition:background-color var(--dur-hover) var(--ease),border-color var(--dur-hover) var(--ease),
+             color var(--dur-hover) var(--ease),scale var(--dur-press) var(--ease)}
+
+/* ---------- the sidebar ---------- */
+/* A few notches quieter: labels in the faint grey at 500, no hairline
+   under every item, and one highlight. The highlight is a single
+   pseudo-element on the nav, moved with transform: it rests on the current
+   page and slides to whichever item the pointer or the keyboard is on.
+   Every row is exactly --nav-row tall, so an item's offset is its index
+   times the row. The pseudo-element only exists while there is something
+   to mark, and @starting-style fades it in where it first appears, so the
+   first paint never sees it slide in from the top of the list. */
+.nav{position:relative}
+.nav a{height:var(--nav-row);padding-block:0;border-bottom:0;position:relative;z-index:1;
+  font-weight:var(--fw-label);color:var(--faint);transition:color var(--dur-hover) var(--ease)}
+/* the link's box is the highlight's (10px out each side, paid back in
+   padding), so the focus ring wraps the highlight; the label stays put */
+.nav a{margin-inline:calc(var(--space-10) * -1);
+  padding-inline:calc(var(--space-10) + var(--space-2)) var(--space-10);border-radius:var(--r-sm)}
+.nav a:focus-visible{color:var(--ink)}
+/* The current page also steps up to the heading weight: ink against the
+   faint grey and the tint against the sidebar are too little on their own
+   for someone with low vision to find where they are. */
+.nav a[aria-current="page"]{color:var(--ink);font-weight:var(--fw-heading)}
+.nav::before{position:absolute;top:0;left:calc(var(--space-10) * -1);right:calc(var(--space-10) * -1);
+  height:var(--nav-row);border-radius:var(--r-sm);background:var(--tint);pointer-events:none;
+  transform:translateY(calc(var(--nav-i, 0) * var(--nav-row)));
+  transition:transform var(--dur-hover) var(--ease),opacity var(--dur-hover) var(--ease)}
+.nav:has(> a[aria-current="page"])::before,
+.nav:has(> a:focus-visible)::before{content:""}
+@starting-style{.nav::before{opacity:0}}
+.nav:has(> a:nth-child(1)[aria-current="page"]){--nav-i:0}
+.nav:has(> a:nth-child(2)[aria-current="page"]){--nav-i:1}
+.nav:has(> a:nth-child(3)[aria-current="page"]){--nav-i:2}
+.nav:has(> a:nth-child(4)[aria-current="page"]){--nav-i:3}
+.nav:has(> a:nth-child(5)[aria-current="page"]){--nav-i:4}
+.nav:has(> a:nth-child(6)[aria-current="page"]){--nav-i:5}
+.nav:has(> a:nth-child(7)[aria-current="page"]){--nav-i:6}
+.nav:has(> a:nth-child(8)[aria-current="page"]){--nav-i:7}
+.nav:has(> a:nth-child(9)[aria-current="page"]){--nav-i:8}
+.nav:has(> a:nth-child(10)[aria-current="page"]){--nav-i:9}
+.nav:has(> a:nth-child(1):focus-visible){--nav-i:0}
+.nav:has(> a:nth-child(2):focus-visible){--nav-i:1}
+.nav:has(> a:nth-child(3):focus-visible){--nav-i:2}
+.nav:has(> a:nth-child(4):focus-visible){--nav-i:3}
+.nav:has(> a:nth-child(5):focus-visible){--nav-i:4}
+.nav:has(> a:nth-child(6):focus-visible){--nav-i:5}
+.nav:has(> a:nth-child(7):focus-visible){--nav-i:6}
+.nav:has(> a:nth-child(8):focus-visible){--nav-i:7}
+.nav:has(> a:nth-child(9):focus-visible){--nav-i:8}
+.nav:has(> a:nth-child(10):focus-visible){--nav-i:9}
+
+/* ---------- the ask field ---------- */
+/* A plain, high-contrast field: the page's emphasis hairline, a soft
+   shadow set into it, and on focus the same ring with a gap that every
+   other control gets. Its corners follow the send key inside it: the
+   key's 8 plus the 10px it sits in from the edge. */
+.field{border-radius:calc(var(--r-sm) + var(--space-10));border-color:var(--field-edge);
+  box-shadow:inset 0 1px 2px light-dark(rgb(0 0 0 / .07), rgb(0 0 0 / .5));
+  transition:border-color var(--dur-hover) var(--ease),background-color var(--dur-hover) var(--ease),
+             transform .46s var(--ease)}
+.field:focus-within{border-color:var(--field-edge);outline:2px solid var(--focus);outline-offset:2px}
+/* Tabbing on to the send key gives it its own ring, so the field lets go of
+   its one: a single ring on screen, like every other control. */
+.field:focus-within:not(:has(#input:focus)){outline:none}
+/* A query the site types into the field for the reader (a nav click) moves
+   the focus there without the reader asking for it: no ring, no ink edge. */
+/* the auto-focus edge is the field's own focus edge (--line-2, set with the
+   2026-10-19 block). It kept --field-edge at 45%, four times any other edge
+   on the page, whenever a nav click typed into the field (Yar, 2026-10-29). */
+.field.auto:focus-within{outline:none;border-color:var(--line-2)}
+#promptblock.askfix.docked:not(.open) .field.auto:focus-within{border-color:var(--line-2)}
+.hero .pinner:has(.field.auto:focus-within){border-color:var(--line)}
+
+/* The "/" hint is drawn as a key: a face and a ring. */
+.key{border-color:var(--key-ring);background:var(--key-face);box-shadow:var(--key-depth);color:var(--faint);
+  transition:opacity var(--dur-hover) var(--ease)}
+
+/* The email field on the tools page is the same kind of field: the ask
+   field's 2026-10-19 edge, shadow and focus step, not the older --field-edge
+   and deeper inset shadow that made the site's two text inputs different
+   objects (Yar, 2026-10-29). */
+.getrow input[type=email]{border-color:var(--line);box-shadow:inset 0 1px 2px light-dark(rgb(0 0 0 / .04), rgb(0 0 0 / .3));
+  transition:border-color var(--dur-hover) var(--ease)}
+.getrow input[type=email]:focus-visible{border-color:var(--line-2)}
+
+/* ---------- suggestion chips and tags ---------- */
+/* Quieter than before: a faint fill and the softest hairline, the label in
+   muted ink. The text sits a pixel high, which puts lower-case ink on the
+   optical centre. Chips are buttons, so they press; tags are not. */
+.chip{border-color:var(--line-soft);background-color:var(--tint);color:var(--muted);
+  padding:calc(var(--space-10) - 1px) var(--space-16) calc(var(--space-10) + 1px);
+  transition:color var(--dur-hover) var(--ease),background-color var(--dur-hover) var(--ease),
+             border-color var(--dur-hover) var(--ease),scale var(--dur-press) var(--ease)}
+/* Tags sit at the 12px label floor with 8px sides: at 13px and 10px they
+   wrapped where the tiles had fitted on one row, and tile heights went uneven. */
+.tags li{font-size:.75rem;line-height:1.4;color:var(--muted);border-color:transparent;background:var(--tint);
+  padding:calc(var(--space-4) - 1px) var(--space-8) calc(var(--space-4) + 1px)}
+
+/* ---------- cards ---------- */
+/* Problems, proof, facts, steps, project and resource cards, the tool
+   panels: 12px corners, the panel surface and a 1px ring, with no shadow.
+   Hover strengthens the ring a step; nothing moves. */
+.prob,.proof,.fact,.step,.card,.p,.tmain,.tside{border-color:var(--ring);box-shadow:var(--depth);
+  transition:border-color var(--dur-hover) var(--ease),box-shadow var(--dur-hover) var(--ease),
+             background-color var(--dur-hover) var(--ease)}
+/* Rows on the tools page take the tint on hover; nothing moves. */
+.row{transition:background-color var(--dur-hover) var(--ease)}
+/* the hairline layouts that reuse .step and .p carry no card */
+.steps--grid .step,.steps--timeline .step,.pgrid:has(> .p:nth-child(5)) > .p{box-shadow:none}
+
+/* Screenshots: the cover runs to the card's outer edge, over the card's own
+   ring, so it takes the card's 12px corners exactly; a 1px inner outline
+   keeps a white or black page from bleeding into the card. */
+.proof picture{margin:calc(var(--space-20) * -1 - 1px) calc(var(--space-24) * -1 - 1px) var(--space-16)}
+.p .cover{width:calc(100% + var(--space-24) * 2 + 2px);margin:calc(var(--space-24) * -1 - 1px) calc(var(--space-24) * -1 - 1px) var(--space-4)}
+.card img.thumb{width:calc(100% + var(--space-20) * 2 + 2px);margin:calc(var(--space-20) * -1 - 1px) calc(var(--space-20) * -1 - 1px) var(--space-4)}
+.proof .shot,.p .cover,.card img.thumb{outline:1px solid var(--img-ring);outline-offset:-1px;
+  transition:opacity var(--dur-hover) var(--ease)}
+/* On /projects the cover is a thumbnail in a row: control corners, and the
+   outline stands in for the old border. */
+.pgrid:has(> .p:nth-child(5)) > .p .cover{border-color:transparent}
+
+/* The client wall's frames take the cards' ring, and hover strengthens it a
+   step, as on the cards. The service tiles keep their hairline. */
+.clientwall li{border-color:var(--ring);transition:border-color var(--dur-hover) var(--ease)}
+.svc{border-top-color:var(--line)}
+/* --line, not --line-soft: the homepage's process tiles are the same grid
+   (three columns, a rule above each tile) and draw --line, so /services'
+   grid sat a step fainter than the rule above it for the same shape
+   (Yar, 2026-10-29). Cells and their dividers take the site's boundary. */
+.steps--grid,.steps--grid .step,.steps--grid .step:nth-child(odd){border-color:var(--line)}
+
+/* ---------- FAQ ---------- */
+/* The answer opens on a smooth change of height and arrives out of a 2px
+   blur; the key's + turns into a ×. The closed key is drawn like the "/"
+   key; open, it inverts.
+   The fade and the blur sit on ::details-content, the box that holds the
+   answer. Content inside a closed <details> is never styled, so the answer
+   had no starting value to move from and its old fade never ran. The box
+   exists open and closed, so its fade does. */
+.faq details::details-content{opacity:0;filter:blur(2px);
+  transition:block-size var(--dur-panel) var(--ease),content-visibility var(--dur-panel) allow-discrete,
+             opacity var(--dur-panel) var(--ease),filter var(--dur-panel) var(--ease)}
+.faq details[open]::details-content{opacity:1;filter:none}
+.faq summary .x{border-color:var(--key-ring);background-color:var(--key-face);box-shadow:var(--key-depth);
+  transition:background-color var(--dur-hover) var(--ease),border-color var(--dur-hover) var(--ease),
+             color var(--dur-hover) var(--ease),box-shadow var(--dur-hover) var(--ease)}
+.faq summary .x::before,.faq summary .x::after{transition:transform var(--dur-panel) var(--ease)}
+.faq details[open] summary .x{box-shadow:none}
+
+/* ---------- the theme key ---------- */
+/* The keycap face of "/", with the edge the other chrome controls carry
+   (--edge-control), pressing in when it is pressed. The switch of theme
+   itself adds nothing to it. */
+.themedock .themer{border-color:var(--edge-control);background:var(--key-face);box-shadow:var(--key-depth);
+  transition:border-color var(--dur-hover) var(--ease),box-shadow var(--dur-press) var(--ease),
+             translate var(--dur-press) var(--ease)}
+
+/* ---------- links ---------- */
+/* An underline that draws in from the left, painted by the link itself:
+   two background lines in the border row, one for rest (--ul, often
+   nothing) and one in the text colour that grows from 0 to the full width
+   on hover. Inline links that wrap draw across both lines in reading
+   order. The 1px borders some of these carried stay, transparent, so no
+   line box changes height. */
+.alink,.faq .alink,.art a:not(.cta),.proof .k a,.footcol a,.asklist a,.fb a:not(.badge),
+.prose p a:not([class]){
+  --ul:transparent;
+  text-decoration:none;border-bottom-color:transparent;
+  background:linear-gradient(currentColor,currentColor) 0 100% / 0 1px no-repeat border-box,
+             linear-gradient(var(--ul),var(--ul)) 0 100% / 100% 1px no-repeat border-box;
+  transition:background-size var(--dur-hover) var(--ease),color var(--dur-hover) var(--ease)}
+/* .alink rests underlined: alone on a line, unmarked, it read as a caption */
+.art a:not(.cta),.proof .k a,.faq .alink,.prose p a:not([class]),.alink{--ul:var(--line-2)}
+/* Links inside a paragraph of an answer page were the paragraph's own grey
+   with no line under them (1.0:1 against the sentence), so the proof pages
+   they lead to could not be seen as links. Ink plus the rest underline, the
+   way article links read. */
+.prose p a:not([class]){color:var(--ink)}
+/* Grid items stretch to their cell, and the drawn line with them ("All
+   tools" drew 1056px under two words). These hug their words. */
+.abody > .alink,.asklist a,.fb-social a{justify-self:start}
+/* Links that wrap are as wide as their column, so a drawn line ran under the
+   whole box. These take a text underline, which follows each line of words. */
+.footcol a,.asklist a{background:none;text-decoration-line:underline;text-decoration-thickness:1px;
+  text-decoration-color:transparent;text-underline-offset:.3em;
+  transition:text-decoration-color var(--dur-hover) var(--ease),color var(--dur-hover) var(--ease)}
+
+/* The footer's booking line: a quiet rule at rest, an ink rule drawing in
+   over it on hover, the arrow nudging along with it. */
+.footcta{border-bottom-color:transparent;
+  background:linear-gradient(currentColor,currentColor) 0 100% / 0 1px no-repeat border-box,
+             linear-gradient(var(--line-2),var(--line-2)) 0 100% / 100% 1px no-repeat border-box;
+  transition:background-size var(--dur-panel) var(--ease)}
+.footcta svg{transition:transform var(--dur-hover) var(--ease)}
+
+/* ---------- focus ---------- */
+/* One ring for every control: 2px of ink with a 2px gap. Inside the
+   client wall each link is clipped by its rounded frame, so the ring sits
+   inside the frame instead. The see-all link has no frame and keeps the
+   usual gap. */
+.clientwall a:focus-visible{outline-offset:-4px}
+.clientwall .more a:focus-visible{outline-offset:var(--space-2)}
+
+/* ---------- the Back and Home bar ---------- */
+/* At the top of the page the bar is invisible. Once the stage has scrolled,
+   it turns solid and a hairline appears under it, so the page passes under
+   a surface instead of colliding with two floating buttons. Driven by the
+   stage's own scroll position, with no script; where scroll timelines are
+   not supported the bar simply stays as it was. On a phone the band behind
+   the menu button is solid from the start and takes the same hairline once
+   the page has scrolled. */
+@supports (animation-timeline:scroll()){
+  .shell{timeline-scope:--stage}
+  .stage{scroll-timeline:--stage block}
+  @media (min-width:721px){
+    /* Full width so it can be a band, up to the stage's own scrollbar. Once
+       solid it takes its own clicks: with pointer-events off, a click on its
+       empty part landed on whatever had scrolled under it. app.js passes the
+       wheel on to the stage, so scrolling over the bar still moves the page. */
+    .topbar{left:0;justify-content:flex-end;
+      animation:bar-on linear both;animation-timeline:--stage;animation-range:0 24px}
+    /* a column that sticks while the page scrolls stops below the bar */
+    body.answered .inclside{top:calc(60px + var(--space-32))}
+  }
+  @media (max-width:720px){
+    /* Solid now, so it no longer needs the 24px the old fade ran out in:
+       it ends where the lowest control's box ends. The hairline follows
+       html.scrolled (app.js): WebKit held a timeline-driven one at its end. */
+    .shell::after{height:calc(var(--header-h) - 24px);background:var(--bg);
+      box-shadow:0 1px 0 transparent;transition:box-shadow var(--dur-hover) var(--ease)}
+    html.scrolled .shell::after{box-shadow:0 1px 0 var(--line)}
+  }
+}
+@keyframes bar-on{
+  from{background-color:transparent;box-shadow:0 1px 0 transparent}
+  to{background-color:var(--bg);box-shadow:0 1px 0 var(--line)}
+}
+/* The bar, the phone band and the dock's fade stop at the stage's scrollbar
+   rather than painting over its thumb. --sbw is its width, measured in
+   app.js: 0 where scrollbars overlay the page, 11px where they take room. */
+.topbar,.shell::after,body.answered .promptblock::before{right:var(--sbw,0px)}
+
+/* Keyboard focus and #fragment jumps stop clear of the fixed furniture. The
+   stage scrolled a focused link flush with its top edge, under the solid bar,
+   where it and its ring disappeared; a 16px margin also keeps the lower half
+   of a ring from being cut off at the bottom. On the homepage the theme key
+   sits in the bottom corner, so the bottom margin clears it. */
+.stage{scroll-padding-block:var(--space-16)}
+body:not(.answered) .stage{scroll-padding-bottom:calc(42px + 44px + var(--space-10))}
+/* where the homepage key rests top right */
+@media (min-width:721px) and (max-width:1140px) and (max-height:760px){
+  body:not(.answered) .stage{scroll-padding-top:calc(var(--space-12) + 44px + var(--space-10));scroll-padding-bottom:var(--space-16)}}
+@media (min-width:721px){body.answered .stage{scroll-padding-top:calc(60px + var(--space-16))}}
+@media (max-width:720px){.stage{scroll-padding-top:calc(var(--header-h) - var(--space-16))}}
+/* clear of the docked field's fade, which starts 38px above the stage's end */
+@media (min-height:561px){body.answered .stage{scroll-padding-bottom:var(--space-48)}}
+
+/* ---------- thinking ---------- */
+/* While the on-site AI writes, the "Thinking" label carries a light
+   shimmer and nothing else moves: the arc that used to turn under it is
+   not drawn. */
+.ahead .tag[data-when="thinking"]{color:transparent;
+  background:linear-gradient(90deg,var(--faint) 0 40%,var(--ink) 50%,var(--faint) 60% 100%) 100% 0 / 250% 100% no-repeat;
+  -webkit-background-clip:text;background-clip:text;animation:think 1.6s linear infinite}
+@keyframes think{to{background-position:0 0}}
+.ai-block .thinking .spin{display:none}
+
+/* ---------- hover, for a fine pointer only ----------
+   Every hover on the site lives here. A tap on a touch screen used to leave
+   a hover state latched on after the finger lifted. */
+@media (hover:hover) and (pointer:fine){
+  .logo:hover .lm-pen{stroke-dashoffset:0}
+  .logo:hover .lm-a1{--lm-t:0.00s}
+  .logo:hover .lm-a2{--lm-t:0.29s}
+  .logo:hover .lm-r1{--lm-t:0.39s}
+  .logo:hover .lm-r2{--lm-t:0.51s}
+  .logo:hover .lm-r3{--lm-t:0.68s}
+  .logo:hover .lm-reg{opacity:1;transition-delay:0.78s}
+
+  .nav:has(> a:hover)::before{content:""}
+  .nav a:hover{color:var(--ink)}
+  .nav:has(> a:nth-child(1):hover){--nav-i:0}
+  .nav:has(> a:nth-child(2):hover){--nav-i:1}
+  .nav:has(> a:nth-child(3):hover){--nav-i:2}
+  .nav:has(> a:nth-child(4):hover){--nav-i:3}
+  .nav:has(> a:nth-child(5):hover){--nav-i:4}
+  .nav:has(> a:nth-child(6):hover){--nav-i:5}
+  .nav:has(> a:nth-child(7):hover){--nav-i:6}
+  .nav:has(> a:nth-child(8):hover){--nav-i:7}
+  .nav:has(> a:nth-child(9):hover){--nav-i:8}
+  .nav:has(> a:nth-child(10):hover){--nav-i:9}
+  .cta:hover{background-color:var(--cta-hover)}
+  .pill:hover{color:var(--ink)}
+  .cta:not([data-cal-link]):not(.ghost):hover{background-color:var(--action-hover)}
+  .cta.ghost:hover{background-color:var(--surface-2);border-color:var(--ring-hover)}
+  .topbar button:hover,.badge:hover{color:var(--ink);border-color:var(--edge-control-hover);box-shadow:var(--depth-hover)}
+  .badge:hover{background-color:var(--surface-2)}
+  .field:hover:not(:focus-within){border-color:var(--line-2)}
+  .field.on .go:hover{background-color:var(--action-hover);border-color:var(--action-hover)}
+  .chip:hover{color:var(--ink);background-color:var(--tint-2);border-color:var(--ring-hover)}
+  .themedock .themer:hover{border-color:var(--edge-control-hover)}
+  .faq summary:hover .x{border-color:var(--ring-hover);color:var(--ink)}
+
+  .prob:hover,.proof:hover,.fact:hover,.step:hover,.card:hover,.p:hover,.tmain:hover,.tside:hover{
+    border-color:var(--ring-hover);box-shadow:var(--depth-hover)}
+  .steps--grid .step:hover,.steps--timeline .step:hover,.pgrid:has(> .p:nth-child(5)) > .p:hover{box-shadow:none}
+  .steps--grid .step:hover,.steps--grid .step:nth-child(odd):hover{border-color:var(--line)}
+  .pgrid:has(> .p:nth-child(5)) > .p:hover{border-color:transparent;border-bottom-color:var(--line)}
+  a.p:hover .cover,a.card:hover img.thumb{opacity:.92}
+  /* a project card with no live site to open answers the pointer like none */
+  .p:not(a):hover{border-color:var(--ring);box-shadow:var(--depth)}
+  .pgrid:has(> .p:nth-child(5)) > a.p:hover h3{text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:2px}
+  .row:hover{background:var(--tint)}
+  .row:hover .arw{transform:translateX(3px);color:var(--ink)}
+  .clientwall a:hover{color:var(--ink)}
+  .clientwall li:has(> a:hover){border-color:var(--ring-hover)}
+  .clientwall .more a:hover::after{transform:translateX(3px)}
+
+  .alink:hover,.faq .alink:hover,.art a:not(.cta):hover,.proof .k a:hover,
+  .footcol a:hover,.asklist a:hover,.fb a:not(.badge):hover,.prose p a:not([class]):hover{background-size:100% 1px,100% 1px}
+  .proof .k a:hover,.footcol a:hover,.asklist a:hover,.fb a:hover{color:var(--ink)}
+  .footcol a:hover,.asklist a:hover{text-decoration-color:currentColor}
+  .footcta:hover{background-size:100% 1px,100% 1px}
+  .footcta:hover svg{transform:translateX(6px)}
+}
+
+/* ---------- press ----------
+   A press uses the scale property, which composes with any transform the
+   control already carries (the menu button rides sideways when the drawer
+   opens). */
+.cta:active,.topbar button:active,.navtoggle:active,.badge:active{scale:.97}
+.chip:active,.field.on .go:active{scale:.96}
+.themedock .themer:active{translate:0 1px;box-shadow:var(--key-depth-in)}
+.getrow .cta:disabled{scale:none}
+
+/* ---------- touch ----------
+   44px targets wherever the pointer is a finger. The footer's link lists
+   and the links that stand on their own line measured 20 to 30px. Links
+   inside a sentence keep their size; the sentence around them is the
+   target's spacing. The text centres in the taller box, and an underline
+   shown at rest moves up with it so it stays under the words. */
+@media (pointer:coarse){
+  .footcol a,.fb a:not(.badge),.aiask a,.asklist a,
+  .sec > .alink,.workhead .alink,.fact .alink{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
+  .faq .alink{display:flex;align-items:center;min-height:44px}
+  .faq .alink,.sec > .alink,.workhead .alink,.fact .alink{
+    background-position:0 calc(100% - var(--space-8)),0 calc(100% - var(--space-8))}
+  /* The 44px rows are the spacing now, so the lists drop their own gaps. */
+  .fb,.footcol,.aiask{row-gap:0}
+  /* keeps the five 44px AI links on one row at 360 */
+  .aiask{column-gap:var(--space-6)}
+  /* Links inside a label line ("Redeploy" and "Hashwallet" in the work
+     cards) measured 17 to 20px tall: 14px above and below makes them 44px or
+     more and moves no line. The underline goes up by the same 14px, so it
+     stays under the word. */
+  .proof .k a{padding-block:14px;background-position:0 calc(100% - 14px),0 calc(100% - 14px)}
+  /* List links (/aeo) keep running as text, so a question that wraps keeps its
+     underline under both lines: 12px of padding makes each line a 45px target,
+     and the list opens to a 20px gap so neighbouring targets do not overlap. */
+  .art ul > li > a:not(.cta){padding-block:var(--space-12);background-position:0 calc(100% - var(--space-12)),0 calc(100% - var(--space-12))}
+  .art ul:has(> li > a){gap:var(--space-20)}
+  /* "All tools" under each tool page: 29px tall, now 45. */
+  .abody > .alink{padding-block:var(--space-12);background-position:0 calc(100% - var(--space-8)),0 calc(100% - var(--space-8))}
+}
+
+/* ---------- reduced motion ----------
+   The sitewide rule above shortens every duration to nothing; these are
+   the pieces that would otherwise still move or flicker. */
+@media (prefers-reduced-motion:reduce){
+  .ahead .tag[data-when="thinking"]{animation:none;background:none;color:var(--faint)}
+  /* its own rule: a browser that does not know ::details-content drops the
+     whole selector list it sits in */
+  .faq details::details-content{filter:none;transition:none}
+  .cta:active,.topbar button:active,.navtoggle:active,.badge:active,.chip:active,
+  .field.on .go:active{scale:none}
+  .themedock .themer:active{translate:none}
+}
+
+/* ---------- smoothed corners ----------
+   Where the browser draws a superellipse, cards and controls get one: the
+   curve eases into the straight edge instead of meeting it at a seam. A
+   squircle at a given radius bends later than a circular arc, so each
+   radius grows by half to keep the size the eye reads; the nesting rule
+   still holds (the field is (8 + 10) x 1.5 around a 12 key). Pills, chips
+   and tags stay fully round. The outline and the shadows follow the same
+   shape, so the focus ring keeps an even gap. */
+@supports (corner-shape:squircle){
+  .prob,.proof,.fact,.step,.card,.p,.tmain,.tside,.clientwall li,.tablewrap,.art pre{
+    corner-shape:squircle;border-radius:calc(var(--r) * 1.5)}
+  .proof .shot,.p .cover,.card img.thumb{
+    corner-shape:squircle;border-radius:calc(var(--r) * 1.5) calc(var(--r) * 1.5) 0 0}
+  .cta,.topbar button,.badge,.navtoggle,.themedock .themer,.go,.key,.faq summary .x,
+  .step .n,.getrow input[type=email],.tside pre,.card .thumb,.nav::before,.nav a{
+    corner-shape:squircle;border-radius:calc(var(--r-sm) * 1.5)}
+  .pgrid:has(> .p:nth-child(5)) > .p .cover{
+    corner-shape:squircle;border-radius:calc(var(--r-sm) * 1.5)}
+  .field{corner-shape:squircle;border-radius:calc((var(--r-sm) + var(--space-10)) * 1.5)}
+  /* the process timeline's stations are circles: a squircle at 50% drew them
+     as rounded squares, with the connector meeting a flat edge */
+  .steps--timeline .step .n{corner-shape:round}
+}
+
+/* ---------- morning fixes, 2026-10-05 ---------- */
+/* Standalone links: the drawn underline sits under the words, not under the
+   link's padding (it hung 10px below the baseline). */
+@media (pointer:fine){
+  .alink,.faq .alink{background-position:0 calc(100% - var(--space-4)),0 calc(100% - var(--space-4))}
+}
+@media (pointer:coarse){
+  .faq .alink,.sec > .alink,.workhead .alink,.fact .alink{background-position:0 calc(50% + .55em),0 calc(50% + .55em)}
+  .abody > .alink{background-position:0 calc(100% - var(--space-12)),0 calc(100% - var(--space-12))}
+}
+/* The theme key sits 42px up and is 44px tall: the wordmark ends above it, so
+   the key never covers its last letter at the end of the page. */
+@media (min-width:721px){.footname{margin-bottom:calc(42px + 44px + var(--space-32))}}
+/* A short window cut the sidebar's end off with no way to reach it: it
+   scrolls now, and its rows tighten where the height runs out. */
+@media (min-width:721px){
+  .side{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+  .side::-webkit-scrollbar{display:none}
+}
+@media (min-width:721px) and (max-height:720px){:root{--nav-row:40px}}
+/* The services lead column only sticks where the whole of it fits on screen */
+@media (max-height:819px){body.answered .inclside{position:static}}
+/* the sidebar wordmark joins the display weight instead of stock bold */
+.wordmark{font-weight:650}
+/* the work strip's focus ring follows the cards' corners */
+.proofs.strip:focus-visible{border-radius:var(--r)}
+/* Windows contrast themes paint backgrounds as Canvas, which erased the FAQ
+   key's drawn + and x; draw them in the text colour there. */
+@media (forced-colors:active){.faq summary .x::before,.faq summary .x::after{background:CanvasText}}
+
+/* ---------- hero and track record, 2026-10-05 ---------- */
+/* Who it is, said plainly: name, then role, the role a step quieter */
+.byrole{color:var(--faint)}
+.byrole::before{content:"";display:inline-block;width:3px;height:3px;border-radius:50%;
+  background:currentColor;vertical-align:.32em;margin-right:var(--space-8)}
+/* The suggestion pills step back: smaller and quieter than the field, so the
+   page invites a scroll before a click */
+.hero .chips{gap:var(--space-6);margin-top:var(--space-12)}
+.hero .chip{font-size:var(--t-xs);padding:var(--space-6) var(--space-12);background-color:transparent;
+  border-color:var(--line-soft);color:var(--faint)}
+@media (hover:hover) and (pointer:fine){.hero .chip:hover{color:var(--muted);background-color:var(--tint)}}
+@media (pointer:coarse){.hero .chip{min-height:36px;display:inline-flex;align-items:center}}
+/* Track record: the three cards hold text of the same length, and the
+   credentials link sits under the row, so no card carries an extra line */
+.record .proofcred .fact p{max-width:none}
+.credlink{display:inline-block;margin-top:var(--space-16)}
+/* The headline now names who it is for, so it runs longer: a smaller cap
+   keeps it to three lines and the field, pills and button on the first screen */
+:root{--t-display:clamp(2.5rem, 1rem + 3.6vw, 4.5rem)}
+.hero h1.display{max-width:20ch}
+/* short laptop windows: the hero starts higher so the button stays on screen */
+@media (min-width:721px) and (max-height:700px){.hero{padding-top:calc(var(--page-top) - 64px)}}
+/* 640 and under, the height where the docked card's own line starts at 512
+   (measurement taken 2026-10-20): the top comes up again so the booking
+   button and the card share a row under the copy, which is the layout the
+   20 October check at 1600x600 approved. */
+/* phones: a 34px headline keeps it to four lines */
+@media (max-width:520px){:root{--t-display:clamp(2.125rem, 1.6rem + 2vw, 2.5rem)}}
+/* phones: the role sits under the name, beside the photo, with no dot */
+@media (max-width:720px){
+  .byline:has(.byrole){display:grid;grid-template-columns:auto 1fr;column-gap:var(--space-12);row-gap:0;align-items:center}
+  .byline:has(.byrole) .byface{grid-row:span 2}
+  .byline:has(.byrole) .byname{align-self:end;line-height:1.3}
+  .byline .byrole{align-self:start;line-height:1.3;font-size:var(--t-xs)}
+  .byline .byrole::before{display:none}
+}
+
+/* ---------- client videos, 2026-10-06 ----------
+   Ten clients carry a short loop of their site above the name (four more
+   since 2026-10-13); Amsterdam Business Forum stays a name and a line. One <video>
+   per cell, muted; app.js plays every one on screen, and once off screen
+   each pauses and waits on its poster frame, as all of them do under
+   reduced motion. */
+.clientwall.framed .cwvid{position:relative;display:block;width:100%;aspect-ratio:16/10;overflow:hidden;
+  border-radius:var(--r-sm);margin-bottom:var(--space-16);background:var(--surface-2)}
+.clientwall.framed .cwvid video{display:block;width:100%;height:100%;object-fit:cover}
+.clientwall.framed .cwvid::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:inset 0 0 0 1px var(--img-ring)}
+
+/* ---------- project pages ---------- */
+/* One page per project (scripts/build-project-pages.mjs). The recording of the
+   site sits under the lead at the full width of the answer column, framed like
+   the client wall's clips: an outline drawn inside the edge, because an inset
+   shadow paints under a video's picture and never shows. */
+.pjvid{margin:0}
+.pjvid video{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:var(--r);
+  background:var(--surface-2);outline:1px solid var(--img-ring);outline-offset:-1px}
+.pjvid figcaption{margin-top:var(--space-10);font-size:var(--t-xs);color:var(--faint)}
+.pjclose{max-width:var(--w-prose);color:var(--ink)}
+.pjfoot{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-16) var(--space-24)}
+.pjfoot .alink{order:2}
+
+/* ============================================================
+   FOOTER, REBUILT 2026-10-06
+   Yar on seeing it: "the footer is fucked". It had three faces (a monospace
+   base row, sans link columns, a grey display wordmark), a booking line
+   hanging about 290px below the top of the link columns, links larger than
+   the body copy above them, and a base row whose four groups lined up with
+   nothing above and stepped down at the top because they were bottom-aligned.
+   Rebuilt on one grid and one face:
+   - .foottop and .footbase share one track list: the booking line's column,
+     then one column per link group. The nav takes the last three tracks as a
+     subgrid, so each base-row group sits exactly under the booking line or a
+     link column, and everything is top-aligned.
+   - Since 2026-10-13 the booking line's column is the FAQ's first column (a
+     third of the width less two 24px gaps) and the gap is the homepage's
+     24px, so the first link column starts on the line of the FAQ questions
+     above it. With 5/3/3/3 tracks and 32px gaps it missed by 11 to 18px.
+   - The base row uses the site's one label style, in the same sans as the
+     rest of the page.
+   - The wordmark stays a little dimmer than the ink, as Yar asked on
+     2026-10-02, fills the column and sits near the bottom of the page. Where
+     the fixed theme key would cover its last letter, app.js measures the
+     overlap into --fn-lane and the wordmark shrinks by exactly that much.
+   ============================================================ */
+.foot .footin{padding-top:var(--sp-96)}
+.foottop,.footbase{display:grid;grid-template-columns:minmax(0,calc((100% - 2 * var(--space-24)) / 3)) repeat(3,minmax(0,1fr));
+  column-gap:var(--space-24);align-items:start}
+.foottop{row-gap:var(--space-40)}
+.foottop .footcta{grid-column:1;align-self:start;margin:0;max-width:none}
+.footnav{grid-column:2 / -1;display:grid;grid-template-columns:subgrid;column-gap:var(--space-24);row-gap:var(--space-32)}
+.footcol h2{margin-bottom:var(--space-16)}
+.footnav .footcol{gap:var(--space-2)}
+.footnav .footcol a{font-size:var(--t-sm);line-height:1.4;color:var(--muted);padding:var(--space-4) 0}
+.footbase{margin-top:var(--sp-96);font-family:var(--font);font-size:var(--t-micro);line-height:1.5;
+  color:var(--faint);letter-spacing:0;text-transform:none}
+.footbase .fb{gap:var(--space-8)}
+.footbase .fb a{color:var(--muted)}
+.footbase .fb-social{display:grid;grid-template-columns:repeat(2,max-content);gap:var(--space-8) var(--space-24)}
+.footname{margin:var(--sp-64) 0 var(--space-24);font-size:calc(15.7cqi - var(--fn-lane, 0px) * .157);
+  color:color-mix(in srgb,var(--ink) 82%,var(--bg))}
+@media (max-width:1099px){
+  .foottop{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .foottop .footcta{grid-column:1 / -1}
+  .footnav{grid-column:1 / -1}
+  .footbase{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:var(--space-32)}
+}
+@media (max-width:720px){
+  .foot .footin{padding-top:var(--sp-64)}
+  .foottop{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .footnav .footcol:last-child{grid-column:1 / -1}
+  .footbase{grid-template-columns:1fr;margin-top:var(--sp-64)}
+  .footname{margin-top:var(--space-40)}
+}
+
+/* ============================================================
+   HERO, REBUILT 2026-10-06
+   Yar on seeing it: "the hero section is puke". Seven items stood in one
+   stack with no grouping (byline, headline, sub, a dotted credentials line,
+   the field with its keycap, four outlined pills, the button), the right
+   half of a wide window held only the faint Y, and the display tracking
+   closed the "rn" in "turn" into an "m". Rebuilt as three groups:
+   - who: the byline;
+   - what: the headline, which now takes the width (up to 88px, three
+     lines), with tracking eased to -0.03em so every letter pair stays open;
+   - next: a row that puts the reasons to act (sub, booking button,
+     credentials) beside the ask card.
+   The ask card is the Composer Yar picked from the four options on
+   2026-10-06: one card holding the input and the suggestions, with the send
+   key in the input row and no keycap. It is the same element when it docks
+   under an answer. The faint Y goes; the composition fills the width.
+   Below 1100px the row stacks in reading order; phones keep their sizes.
+   2026-10-13, the hero carries its proof. The headline runs across the
+   content width in two lines from 1100px; under it two equal columns on
+   the 24px gap: the sub, the booking button, the ask card at rest and the
+   three figures on the left, a 16:9 film frame on the right; under both,
+   the client marks. The DOM holds the phone's reading order (byline,
+   headline, sub, button, ask card, film, figures, marks) and the grid
+   places it from 1100px.
+   ============================================================ */
+:root{--t-display:clamp(2.5rem, .25rem + 5.1vw, 5.5rem)}
+@media (min-width:721px) and (max-height:820px){:root{--t-display:clamp(2.5rem, .25rem + 4.4vw, 4.5rem)}}
+@media (max-width:520px){:root{--t-display:clamp(2.125rem, 1.6rem + 2vw, 2.5rem)}}
+.hero h1.display{max-width:none;letter-spacing:-.03em;line-height:.98;margin:0 0 var(--space-24)}
+.heromark{display:none}
+.hero .byline{margin-bottom:var(--space-24)}
+.hero .sub{margin:0;max-width:44ch}
+.hero .herocta{margin:var(--space-24) 0 0}
+/* The hero's booking button: a flat green pill, the same booking green the
+   rest of the site uses, with one edge a step darker than its own fill.
+   Green means booking, so the fill carries the meaning and nothing else has
+   to. No glass, no glow, no gradient, no pointer light: the site keeps those
+   out on purpose (see VISUAL POLISH above), and on cream a smoked-glass pill
+   read as a dark blob rather than a button.
+   Hover brightens the fill one step; the arrow slides 2px; a press settles
+   to 98%. Both themes take the same rules, because --cta and --cta-ink are
+   already solved per theme (4.86:1 light, 8.6:1 dark). */
+.hero .herocta .cta{display:inline-flex;align-items:center;gap:14px;
+  height:56px;padding:0 26px;border-radius:999px;corner-shape:round;
+  font-size:16px;line-height:1;font-weight:600;letter-spacing:-.01em;
+  background:var(--cta);color:var(--cta-ink);
+  box-shadow:0 0 0 1px color-mix(in oklab, var(--cta) 74%, #000);
+  transition:background-color var(--dur-hover) var(--ease),
+    translate var(--dur-hover) var(--ease),scale var(--dur-press) var(--ease)}
+.hero .herocta .cta-label{font-weight:inherit;white-space:nowrap}
+.hero .herocta .cta-go{flex:none;display:grid;place-items:center;width:16px;height:16px;
+  background:none;color:inherit;transition:transform var(--dur-hover) var(--ease)}
+.hero .herocta .cta-go svg{width:16px;height:16px}
+.hero .herocta .cta:hover{background:var(--cta-hover);translate:0 -1px}
+.hero .herocta .cta:hover .cta-go{transform:translateX(2px)}
+.hero .herocta .cta:active{translate:0 0;scale:.98}
+.hero .herocta .cta:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){
+  .hero .herocta .cta:hover,.hero .herocta .cta:hover .cta-go{translate:none;transform:none}
+}
+body:not(.answered) .hero .promptblock{margin-top:var(--space-24)}
+
+/* the film frame: one muted loop, framed like the site's other frames, its
+   pause key in the lower left corner, clear of the theme key.
+   The frame takes --line, the site's one boundary: the 50% ink edge it used
+   to draw was more than twice --line-2 and read as a heavier box than the ask
+   card beside it (Yar, 2026-10-29). Media is separated by its own picture,
+   not by a dark rule. */
+.herofilm{position:relative;margin:var(--space-32) 0 0;aspect-ratio:16/9;overflow:hidden;
+  border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2)}
+.herofilm video{display:block;width:100%;height:100%;object-fit:cover}
+.herofilm .vidpause{position:absolute;left:var(--space-12);bottom:var(--space-12);width:32px;height:32px;
+  padding:0;justify-content:center}
+
+/* The reel: one video element that plays the project promos in turn, with the
+   client's name, year and line under it. Small on purpose: the copy comes first. */
+.minireel{margin:0;min-width:0}
+.minireel__frame{position:relative;aspect-ratio:16/9;overflow:hidden;
+  border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2)}
+.minireel__video{display:block;width:100%;height:100%;object-fit:cover}
+.minireel__caption{margin:var(--space-10) 0 0}
+.minireel__head{display:flex;align-items:center;gap:var(--space-8);font-size:var(--t-sm);line-height:1.4}
+.minireel__name{color:var(--ink);text-decoration:none;
+  background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .18s var(--ease)}
+.minireel__name:hover,.minireel__name:focus-visible{background-size:100% 1px}
+.minireel__name:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+.minireel__year{color:var(--faint);font-variant-numeric:tabular-nums}
+.minireel__pause{width:28px;height:28px;flex:0 0 auto;display:grid;place-items:center;padding:0;
+  border:1px solid var(--edge-control);border-radius:999px;background:none;color:var(--ink);cursor:pointer}
+.minireel__head .minireel__pause{margin-left:auto}
+.minireel__pause svg{display:block;fill:currentColor}
+.minireel__pause .i-play{display:none}
+.minireel__pause.is-paused .i-pause{display:none}
+.minireel__pause.is-paused .i-play{display:block}
+.minireel__line{margin:4px 0 0;font-size:var(--t-xs);line-height:1.5;color:var(--muted)}
+/* Stacked (below 1100px): the reel keeps its small size and gets air above it. */
+@media (max-width:1099px){.minireel{margin-top:var(--space-32);max-width:336px}}
+@media (min-width:721px) and (max-width:1099px){.minireel{margin-top:56px}}
+
+/* ============================================================
+   THE ASK FIELD, IN THE HERO. The card has three states, and app.js sets a
+   class on #promptblock and places the card inline on every frame:
+     rest    the card in the hero's flow (below 1100px, and on short windows)
+     docked  the pill at the foot of the screen, which condenses into the
+             "Ask Yar" capsule beside the theme key as the page scrolls
+     open    the dock with its suggestions, once the field has focus
+   This block styles the card in the flow and its suggestions. The docked
+   and condensed rules follow in THE FIELD sections, and the answered rules
+   sit with them.
+   ============================================================ */
+
+/* the card in the hero: its edge and fill; the field inside is transparent */
+.hero .pinner{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
+  padding:var(--space-2) 0 var(--space-12);transition:border-color var(--dur-hover) var(--ease)}
+@media (hover:hover) and (pointer:fine){
+  .hero .pinner:hover:not(:focus-within){border-color:color-mix(in oklab,var(--ink) 65%,transparent)}
+}
+.hero .pinner:focus-within{border-color:var(--ink)}
+#promptblock.askfix.docked:not(.open) .field:focus-within{border-color:var(--ink)}
+.hero .pinner .field,.hero .pinner .field:hover,.hero .pinner .field:focus-within{
+  border-color:transparent;background:none;box-shadow:none;outline:none;height:58px}
+.hero .pinner .key{display:none}
+.hero .pinner .go{width:38px;height:38px;border-radius:999px;corner-shape:round;border:0;
+  background:color-mix(in oklab,var(--ink) 9%,transparent)}
+.hero .pinner .go svg{rotate:-90deg}
+.hero .pinner .field.on .go{background:var(--action);color:var(--action-ink)}
+/* under an answer the suggestions are hidden, so the card closes up */
+body.answered .hero .pinner{padding-bottom:var(--space-2)}
+
+/* the suggestions are plain text and hidden at rest. Once open they run in one
+   row (two columns on a phone). Each keeps 6px above and below and a 1px
+   transparent border, so a row is as tall as it was. */
+.hero .pinner .chips{display:none;margin:0;padding:0 var(--space-12) 0 var(--space-20);gap:var(--space-6) var(--space-16)}
+.hero .pinner .chip{border-color:transparent;border-radius:calc(var(--r-sm) / 2);background-color:transparent;scale:none;
+  color:var(--muted);font-size:var(--t-xs);padding:var(--space-6) 0;
+  text-decoration-line:underline;text-decoration-thickness:1px;text-decoration-color:transparent;text-underline-offset:3px;
+  transition:color var(--dur-hover) var(--ease),text-decoration-color var(--dur-hover) var(--ease)}
+.hero .pinner .chip:focus-visible{color:var(--ink);text-decoration-color:currentColor}
+@media (hover:hover) and (pointer:fine){
+  .hero .pinner .chip:hover{color:var(--ink);text-decoration-color:currentColor}
+}
+/* contrast themes paint a transparent border in the link colour, so the border
+   gives way to padding and the questions show as underlined links */
+@media (forced-colors:active){
+  .hero .pinner .chip{border-style:none;padding:calc(var(--space-6) + 1px) 1px;text-decoration-color:currentColor}
+}
+#promptblock.open .pinner .chips{display:grid;grid-template-columns:repeat(2,max-content);gap:var(--space-6) var(--space-16)}
+@media (min-width:721px){#promptblock.open .pinner .chips{display:flex;flex-wrap:wrap;gap:6px 20px}}
+@media (max-width:720px){
+  #promptblock.open .pinner .chips{grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:var(--space-6) var(--space-12);padding:0 var(--space-12) 0 var(--space-16)}
+  #promptblock.open .pinner .chip{min-width:0}
+}
+
+/* the first load: a slow rise after a 0.5s hold, once per load (app.js sets
+   .arrive). The card waits invisible until app.js has placed it and released
+   it (.asked), so it never shows in the flow and then moves to the foot. A
+   page without JS lifts the hold with a <noscript> style. */
+@keyframes askGrow{
+  from{opacity:0;transform:scale(.5)}
+  to{opacity:1;transform:none}
+}
+#promptblock.arrive > .pinner{animation:askGrow 720ms cubic-bezier(.16,1,.3,1) 120ms backwards}
+@media (prefers-reduced-motion:reduce){#promptblock.arrive > .pinner{animation:none}}
+body:not(.answered) .hero .promptblock:not(.asked):not(.docked) > .pinner{visibility:hidden}
+@media (min-height:561px){
+  body:not(.answered) .hero .promptblock.arrive > .pinner{visibility:visible}
+}
+
+/* The film in the second section keeps no top margin. */
+
+
+/* The card on the homepage (2026-10-14) docks at the foot of the screen from the
+   first frame on wide layouts (1100px and up); stacked layouts keep it in the flow
+   until it has scrolled away. One card in three states, each a class on its slot that app.js sets
+   and GSAP Flip animates: .docked, the pill; .open when clicked or focused, where its
+   suggestions run in one row from 721px; .docked.open, the dock's width with the
+   suggestions back. The slot keeps the card's resting height, so the hero never
+   reflows. The pill's middle sits on the theme key's line, 64px up; below 1140px it
+   leaves the key's corner, as the answered dock does. Under an answer the same pill
+   shows once the page has scrolled 64px down, and opening it brings back the full
+   dock (app.js). */
+#promptblock.docked{z-index:30}
+/* over the veil while the sidebar writes its question, as at rest (z 71) */
+body.asking #promptblock.docked{z-index:71}
+#promptblock.docked > .pinner{position:fixed;bottom:40px;left:var(--sidebar-w);
+  right:calc(var(--sbw,0px) + var(--ask-key,0px));margin-inline:auto;
+  width:min(360px, calc(100vw - var(--sidebar-w) - var(--sbw,0px) - var(--ask-key,0px) - 2 * var(--pad-x)));
+  border-radius:var(--r-pill);padding:0 var(--space-6) 0 0}
+#promptblock.docked:not(.open) .chips{display:none}
+#promptblock.docked:not(.open) .field{height:46px}
+#promptblock.docked:not(.open) .go{width:34px;height:34px}
+#promptblock.docked.open > .pinner{bottom:34px;border-radius:22px;padding:var(--space-2) var(--space-8) var(--space-12) 0;
+  width:min(var(--w-field), calc(100vw - var(--sidebar-w) - var(--sbw,0px) - var(--ask-key,0px) - 2 * var(--pad-x)))}
+@media (max-width:1140px) and (min-height:561px){#promptblock{--ask-key:calc(var(--space-20) + 44px + var(--space-12))}}
+/* a phone's key rests in the top band, so the pill takes the foot's width */
+@media (max-width:720px){
+  #promptblock.docked > .pinner,#promptblock.docked.open > .pinner{left:var(--space-16);right:var(--space-16);bottom:var(--space-16);width:auto}
+  /* under an answer the key sits at the foot, so the pill leaves its corner
+     and centres on its line, as the answered dock does */
+  body.answered #promptblock.docked > .pinner{bottom:40px;right:calc(var(--space-16) + 44px + var(--space-8))}
+}
+@media (min-width:1100px){#promptblock.open:not(.docked) .field input{font-size:var(--t-lead)}}
+/* the input row grows 14px into the gap above the figures only where the
+   gap is 32px: in the tighter gaps of shorter windows (see the end of this
+   block) its focus ring would meet their hairlines */
+@media (min-width:1100px) and (min-height:936px){#promptblock.open:not(.docked) .field{height:72px}}
+/* focus and #fragment jumps stop clear of the pill, and the footer's
+   wordmark ends above it; under an answer the stage already ends above the
+   dock's band */
+body:not(.answered) .stage:has(#promptblock.docked){scroll-padding-bottom:calc(40px + 48px + var(--space-10))}
+@media (max-width:720px){
+  body:not(.answered) .stage:has(#promptblock.docked){scroll-padding-bottom:calc(var(--space-16) + 48px + var(--space-10))}
+  body:not(.answered) .stage:has(#promptblock.docked) .footname{margin-bottom:calc(var(--space-16) + 48px + var(--space-24))}
+}
+
+@media (min-width:1100px){
+  /* two lines across the content width: the longer line measures 16.7em */
+  :root{--t-display:calc(min(var(--w-page), 100vw - var(--sidebar-w) - 2 * var(--pad-x) - var(--sbw,0px)) / 17)}
+  .hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:var(--space-24);row-gap:0;align-items:start;align-content:center;
+    grid-template-areas:"by by by" "h1 h1 h1" "sub sub reel" "cta cta reel" "quote quote reel" "ask ask reel"}
+  .hero .byline{grid-area:by}
+  .hero h1.display{grid-area:h1;margin-bottom:var(--space-40)}
+  .hero .sub{grid-area:sub;max-width:516px}
+  .hero .herocta{grid-area:cta}
+  .hero .quotes{grid-area:quote}
+  .hero .promptblock{grid-area:ask}
+  .minireel{grid-area:reel}
+  /* the hero field is 516px wide; docked under an answer it keeps its own width */
+  body:not(.answered) .hero .promptblock,body:not(.answered) .hero .pinner{width:min(516px,100%)}
+}
+/* Windows up to 935px tall from 1100px wide: the gaps step down so the whole
+   hero shows (at 1440x900 the client marks ended on the fold), and up to
+   870px it also starts 64px higher, off the nav line, so the figures stay on
+   the first screen at 1366x768. */
+@media (min-width:1100px) and (max-height:935px){
+  .hero .byline{margin-bottom:var(--space-16)}
+  .hero h1.display{margin-bottom:var(--space-24)}
+  .hero .herocta,body:not(.answered) .hero .promptblock{margin-top:var(--space-16)}
+}
+@media (min-width:1100px) and (max-height:870px){.hero{padding-top:calc(var(--page-top) - 64px)}}
+/* and up to 760px tall a few more pixels come out of the gaps, so at 1280x720
+   the fold falls between the figures and the marks instead of through the
+   figures' captions */
+@media (min-width:1100px) and (max-height:760px){
+  .hero .byline{margin-bottom:var(--space-12)}
+  .hero h1.display{margin-bottom:var(--space-16)}
+  .hero .herocta,body:not(.answered) .hero .promptblock{margin-top:var(--space-12)}
+}
+/* Fold rules (2026-10-14): from 1100px wide the homepage hero fills the first
+   screen at every height, so the film frame that follows it (the second
+   section) and the first statement sit below the fold. The hero's items keep
+   their places. Below 1100px the hero stacks taller than any window and the
+   page simply scrolls. The tiers that set the fold in the first statement's
+   gaps (2026-10-13) went when the film moved into the second section.
+   :has(#hero-title) keeps the rule on the homepage's hero. Run
+   python3 tools/fold/sweep.py after changing the hero or the first section. */
+@media (min-width:1100px){
+  body:not(.answered) .hero:has(#hero-title){min-height:100svh}
+}
+/* Too short for the whole hero (under 700px), the hero's centred block ran
+   past the screen: the resting card and the copy under it sat behind the
+   docked pill's fixed line (measured 2026-10-20 at 1600x600). The block
+   starts higher and the slot gives its height back, which also lets the
+   hairline and the figures on their two lines through. The figures give
+   back the 16px the earlier tiers added above their hairline. */
+/* Under 700px tall the block cannot meet 100svh, so the hero centres what it
+   has and ends short of the screen. The figures take one line on their two
+   rows (their labels lose no words), the slot gives its height back, and the
+   resting card keeps its own 46px, clear of them and of the docked pill's
+   fixed line. The hero's end is padded down to the pill so nothing on it is
+   cut by the scroller's edge. Measured at 1600x600 and 1440x660. */
+@media (min-width:1100px) and (max-height:700px){
+  .hero{padding-top:calc(var(--page-top) - 24px);padding-bottom:var(--space-56)}
+  body:not(.answered) .hero .promptblock{margin-top:0;height:0;overflow:visible}
+}
+/* (the 1141-1587px top-right lift retired 2026-10-19: the reel no longer
+   sends its caption to the corner, so the key keeps its bottom-right home;
+   Yar called the top-right placement out the same day) */
+/* Short desktop windows (600-700px tall) put the reel's caption at the
+   corner's height, so the key lifts for those and those only; at every
+   normal height it keeps its bottom-right home. The corner capsule is
+   placed by app.js and stays at the foot regardless. */
+@media (min-width:1100px) and (min-height:561px) and (max-height:700px){
+  body:not(.answered) .themedock{top:var(--space-12);bottom:auto}
+}
+
+/* ============================================================
+   SECTION HEADINGS AND SURFACES: ONE SYSTEM, 2026-10-06
+   Yar: "things are inconsistent". Measured at his window (1600 wide), the
+   homepage's section heads came in five unrelated sizes: statements at 67px
+   (one step under the 72px headline), Featured work at 50px, the closing
+   call at 72px, Questions at 45px and the process heading at 20px. Cards came
+   in three treatments: boxed problems and steps, open services, and a
+   sideways strip cut off at the window edge.
+   One scale now, each step clearly under the one above it:
+     headline 88  >  statements and the closing call 52  >  section titles 40  >  labels 13
+   (since 2026-10-13 the headline sets two lines across the hero and peaks at
+   69px, still a step over the statements)
+   Since 2026-10-12 the stat figures and the footer's booking line take the
+   section-title step too, every heading under the H1 is set at 590, and on
+   a phone statements and section titles bottom out at 26 and 22px, so the
+   34px headline leads them by a step.
+   One surface rule: proof sits in frames (client sites, featured work, the
+   credential cards); explanation is open, a hairline above each item, the
+   way services already were.
+   ============================================================ */
+/* Statements join the one heading scale (2026-10-18, Yar: "no special size
+   text unless absolutely necessary, apart from the main title"). They read
+   at --t-section like every other h2, carried by weight 590; the homepage
+   headline above them stays the one special size (--t-display). */
+:root{
+  --t-statement:var(--t-section);
+  --t-section:clamp(1.375rem, 1rem + 1.5vw, 2.5rem);
+}
+.sec .statement{font-size:var(--t-statement);max-width:22ch}
+.bigcta h2{font-size:var(--t-statement);max-width:18ch}
+#sec-proof,#sec-process,#sec-faq{font-size:var(--t-section);font-weight:var(--fw-heading);
+  letter-spacing:-.025em;line-height:1.08}
+#sec-process{max-width:24ch;margin-bottom:var(--space-40)}
+
+/* problems: open items under a hairline, on the shared 24px column gap */
+.stmt .probs{gap:var(--space-40) var(--space-24)}
+.stmt .prob{background:none;border:0;border-radius:0;box-shadow:none;border-top:1px solid var(--line);
+  padding:var(--space-20) 0 0}
+
+/* process: three open steps side by side, the number above the title, on
+   the shared 24px column gap */
+[aria-labelledby="sec-process"] .steps{gap:var(--space-40) var(--space-24)}
+[aria-labelledby="sec-process"] .step{background:none;border:0;border-radius:0;box-shadow:none;
+  border-top:1px solid var(--line);padding:var(--space-20) 0 0;display:block}
+[aria-labelledby="sec-process"] .step .n{width:auto;height:auto;background:none;color:var(--faint);
+  display:block;font-size:var(--t-micro);font-weight:var(--fw-label);margin-bottom:var(--space-12);border:0}
+[aria-labelledby="sec-process"] .step .n::before{content:"Step "}
+@media (min-width:1100px){
+  [aria-labelledby="sec-process"] .steps{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* featured work: a two-by-two grid where there is room, so nothing is cut
+   off at the window edge; the sideways strip stays for narrower screens */
+@media (min-width:1100px){
+  .proofs.strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-24);
+    overflow:visible;scroll-snap-type:none}
+  .proofs.strip > .proof{flex:none}
+  .work .stripbar{display:none}
+}
+
+/* ============================================================
+   VIDEO CONTROLS, 2026-10-06
+   Every autoplaying loop longer than five seconds can be paused: the ten
+   client previews share one control, and since 2026-10-13 app.js plays
+   every one that is on screen. The site film that sat beside the first statement came off the
+   homepage on 2026-10-12 with its rules; tools/sitefilm keeps its engine.
+   ============================================================ */
+.vidpause{display:inline-flex;align-items:center;gap:var(--space-8);padding:var(--space-6) var(--space-12);
+  border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--muted);
+  font:var(--fw-label) var(--t-micro)/1.2 var(--font);cursor:pointer;
+  transition:color var(--dur-hover) var(--ease),border-color var(--dur-hover) var(--ease)}
+.vidpause::before{content:"";flex:none;box-sizing:border-box;width:8px;height:10px;
+  border-left:3px solid currentColor;border-right:3px solid currentColor}
+.vidpause[aria-pressed="true"]::before{width:0;height:0;border-right:0;
+  border-left:8px solid currentColor;border-top:5px solid transparent;border-bottom:5px solid transparent}
+@media (hover:hover) and (pointer:fine){.vidpause:hover{color:var(--ink);border-color:var(--line-2)}}
+.clientshead{display:flex;align-items:center;justify-content:space-between;gap:var(--space-16);margin-bottom:var(--space-20)}
+.clientshead .kicker{margin:0}
+.vidstill .vidpause{display:none}
+
+/* The reel is static again (2026-10-18): it plays in the hero's third column
+   and does not travel. The growth animation from 2026-10-15/16 is gone with
+   its box; these leftovers keep the pause key's affordances and the caption's
+   measure. */
+.minireel__pause:focus-visible{outline:2px solid var(--focus);outline-offset:4px}
+@media (hover:hover) and (pointer:fine){.minireel__pause:hover{background:var(--surface-2);border-color:var(--edge-control-hover)}}
+.minireel__caption .minireel__line{max-width:56ch}
+
+/* TYPE SCALE (2026-10-18, Yar's request): one size per heading level everywhere;
+   only the homepage headline is bigger. The sizes live in the token block's
+   --t-* values; the residuals here move the few elements whose own rules are
+   specific enough to need naming. No !important: the sources sit above in this
+   sheet and these come after them. */
+.pgrid:has(> .p:nth-child(5)) > .p h3{font-size:var(--t-h3)}  /* the fifth problem's display-style card title reads as body again */
+.tags li{font-size:var(--t-xs)}
+.footcol h2{font-size:var(--t-micro)}  /* footer group names are labels, like the sidebar's */
+.footnav .footcol a{font-size:var(--t-sm)}
+
+/* ============================================================
+   ONE VIDEO, EXPANDED (2026-10-19, Yar): the homepage keeps one video,
+   the hero reel. Its frame is a button; pressed, reel.js expands the same
+   figure over the page with GSAP Flip (one element morphed, never a
+   second player). The veil dims the page, the close key sits in the
+   caption, and Escape or a press on the veil sends it back.
+   ============================================================ */
+/* the frame is a button: reset its chrome, keep the video inside it */
+.minireel__open{display:block;width:100%;padding:0;border:0;background:none;cursor:pointer;touch-action:manipulation}
+.minireel__open:focus-visible{outline:2px solid var(--focus);outline-offset:4px;border-radius:var(--r)}
+/* the veil sits under the expanded reel and over the page */
+.reelveil{position:fixed;inset:0;z-index:90;border:0;padding:0;background:rgba(0,0,0,.72);
+  cursor:default;color-scheme:dark}
+.reelveil:focus-visible{outline:none}
+body.reelopen{overflow:hidden}
+body.reelopen .stage{overflow:hidden}
+/* expanded: the reel centres in the viewport. reel.js measures and sets an
+   explicit width and height inline, and inset:0 + margin:auto centres the
+   box from them. No translate property: GSAP Flip animates transform, and
+   the two would compose into an arc instead of a straight morph (seen and
+   fixed 2026-10-19). */
+.minireel.is-expanded{position:fixed;z-index:95;inset:0;margin:auto;max-width:none}
+/* GSAP writes the box's transform every frame during the morph; the reel's own
+   transform transition would ease each of those writes again and lag */
+.minireel.is-morphing{transition:none}
+/* over the veil the page's own hairline has gone dark-on-dark, so the frame
+   takes the caption keys' white edge; it is the same 22% the other expanded
+   furniture uses */
+.minireel.is-expanded .minireel__frame{border-width:1px;border-color:rgba(255,255,255,.22);border-radius:var(--r)}
+.minireel.is-expanded .minireel__caption{margin-top:var(--space-16)}
+/* over the dark veil the caption is the one lit thing on the page: ink on a
+   dimmed page would be unreadable, so the words and keys go light */
+.minireel.is-expanded .minireel__caption,.minireel.is-expanded .minireel__name{color:#F2F2F0}
+.minireel.is-expanded .minireel__year{color:rgba(255,255,255,.62)}
+.minireel.is-expanded .minireel__line{color:rgba(255,255,255,.76)}
+.minireel.is-expanded .minireel__pause,.minireel.is-expanded .minireel__close{color:#F2F2F0;
+  border-color:rgba(255,255,255,.22);background:none}
+@media (max-width:720px){.minireel.is-expanded .minireel__caption{padding:0 var(--space-16)}}
+.minireel.is-expanded .minireel__line{max-width:none}
+.minireel.is-expanded .minireel__name{pointer-events:none}
+/* The close key hides at rest, shows when expanded, next to the pause key.
+   The pause pin the head to the right with margin-left:auto; once the close
+   key is in the row it has to take that role instead, or it strands itself
+   in the middle of the row right after the year (Yar, 2026-10-27). */
+.minireel.is-expanded .minireel__head .minireel__close{margin-left:auto}
+.minireel.is-expanded .minireel__head .minireel__pause{margin-left:0}
+.minireel__close{display:none;width:28px;height:28px;flex:0 0 auto;place-items:center;padding:0;
+  border:1px solid var(--edge-control);border-radius:999px;background:none;color:var(--ink);cursor:pointer;
+  transition:background var(--dur-hover) var(--ease),border-color var(--dur-hover) var(--ease)}
+.minireel__close svg{display:block}
+.minireel.is-expanded .minireel__close{display:grid}
+@media (hover:hover) and (pointer:fine){.minireel__close:hover{background:var(--surface-2);border-color:var(--edge-control-hover)}}
+.minireel__close:focus-visible{outline:2px solid var(--focus);outline-offset:4px}
+/* the pause key loses its own hover state while the close key is showing;
+   one affordance per key, the same way the site's controls read */
+
+/* ============================================================
+   THE ASK FIELD, 2026-10-19 (Yar): a quieter edge, and the collapsed
+   pill tucks into the foot's right corner beside the theme key, the way
+   Lovable's editing banner docks. The dock's width shrinks with the page
+   instead of holding a fixed band.
+   ============================================================ */
+.field{border-color:var(--line);box-shadow:inset 0 1px 2px light-dark(rgb(0 0 0 / .04), rgb(0 0 0 / .3))}
+/* the capsule floats over content, so it carries its own surface, not the
+   page's: one step up with a real edge, as the cards read */
+#promptblock.docked:not(.open) .field{background:var(--surface);border-color:var(--line-2)}
+.field:focus-within{border-color:var(--line-2)}
+/* the open dock is one card: the card draws the only edge, and the field
+   inside it is bare. The field's own 2px outline used to sit 2px outside its
+   edge, so a typed question drew two edges; focus now lights the card */
+/* the resting pill's field keeps the pill's own ends: its squircle corners
+   were 27px against the pill's full round, and the two edges notched */
+#promptblock.docked:not(.open) .field{border-radius:var(--r-pill);corner-shape:round}
+#promptblock.docked.open > .pinner{border:1px solid var(--line-2)}
+#promptblock.docked.open > .pinner:focus-within{border-color:var(--ink)}
+#promptblock.docked.open .field,#promptblock.docked.open .field:focus-within{
+  border-color:transparent;box-shadow:none;outline:none;background:none}
+/* the resting pill and the capsule show focus on the field's own edge (ink,
+   above). The 2px outline sat 2px outside that edge, so pressing the pill
+   drew a second ring as it docked; the outline goes in the docked states */
+#promptblock.docked:not(.open) .field:focus-within{outline:none}
+/* One edge on the closed capsule, the field's. The hero card's own border and
+   fill stayed on the wrapper around a field that already drew a pill, and the
+   wrapper's 6px right padding pushed the two curves apart at that end, so
+   answer pages showed a second round beside the send key (Yar, 2026-10-29).
+   The same rule the homepage's card has always had; open, the wrapper draws
+   the one edge and the field inside is bare. */
+#promptblock.docked:not(.open) > .pinner{border:0;background:none;padding:0}
+/* the pill rests in the corner: a 64px capsule at the foot's right edge,
+   clear of the theme key above it */
+#promptblock.docked > .pinner{bottom:var(--space-12);left:auto;right:calc(var(--space-20) + 44px + var(--space-16))}
+#promptblock.docked.open > .pinner{bottom:var(--space-12);left:var(--space-16);right:var(--space-16)}
+@media (max-width:1140px) and (min-height:561px){
+  #promptblock.docked > .pinner{right:calc(var(--space-16) + 44px + var(--space-16))}
+}
+@media (max-width:720px){
+  #promptblock.docked > .pinner,#promptblock.docked.open > .pinner{right:var(--space-16)}
+  body.answered #promptblock.docked > .pinner{right:calc(var(--space-16) + 44px + var(--space-8))}
+}
+
+/* ============================================================
+   THE FIELD (rewritten 2026-10-20, Yar): one card, placed inline every
+   frame by app.js as a function of the scroll. At rest it is the 360px
+   pill at the foot of the first screen; scrolled, the same card condenses
+   into the corner capsule reading "Ask Yar" beside the theme key.
+   The card is the shape in both states, so there is never a second edge:
+   at the capsule the field inside carries the border and the fill, and the
+   card around it is bare. The word sits at the left inset and the send key
+   at the right, so the row closes evenly as the card narrows.
+   ============================================================ */
+.askword{display:none}
+/* askCard (the .pinner) is the fixed, inline-positioned element. Left, top,
+   width and height come from app.js each frame; everything else that the
+   older .docked rules set is neutralised here, or its auto margins would
+   drag the card off the inline position. */
+#promptblock.askfix.docked > .pinner{position:fixed;z-index:30;overflow:hidden;
+  inset:auto;margin:0;max-width:none;border-radius:inherit;padding:0;border:0;background:none}
+#promptblock.askfix.docked.open > .pinner{padding:var(--space-2) 0 var(--space-12) 0}
+body.asking #promptblock.askfix > .pinner{z-index:71}
+/* the open dock's card carries the edge; the field inside is its row.
+   --line-2, the closed capsule's own edge: the same card should not change
+   weight as it opens (Yar, 2026-10-29). */
+#promptblock.askfix.docked.open > .pinner{border-radius:22px;border:1px solid var(--line-2);background:var(--surface)}
+/* the card around the closed pinner draws nothing while it is condensed:
+   the field inside is the capsule, one border and one fill */
+#promptblock.askfix.condensed > .pinner{padding:0;border:0;background:none}
+/* closed states have no chips, so the field fills the card exactly */
+#promptblock.askfix.docked:not(.open) .field{height:100%}
+#promptblock.askfix.condensed .field{width:auto;height:46px;
+  padding:0 var(--space-6) 0 var(--space-16);gap:var(--space-10);
+  border-radius:999px;cursor:pointer;
+  background:var(--surface);border-color:var(--line-2)}
+/* the input leaves the row but not the tab order or the click target: it
+   keeps a 1px invisible box at the capsule's left inset, still focussable,
+   so a press opens the dock the way it always did */
+#promptblock.askfix.condensed .field input{position:absolute;left:var(--space-16);top:50%;
+  width:1px;height:1px;min-width:0;opacity:0;padding:0;pointer-events:none;transform:translateY(-50%)}
+#promptblock.askfix.condensed .field .key{display:none}
+/* the word and the send key sit at the row's two ends at every width the
+   capsule passes through, so the row closes evenly instead of collapsing
+   left and leaving a slack right edge */
+#promptblock.askfix.condensed .field{justify-content:space-between}
+#promptblock.askfix.condensed .askword{display:block;white-space:nowrap;
+  font:var(--fw-label) var(--t-sm)/1 var(--font);letter-spacing:-.006em;color:var(--ink);
+  opacity:1;transition:opacity .16s var(--ease)}
+#promptblock.askfix.condensed .go{width:34px;height:34px;border-radius:999px;pointer-events:none}
+/* arriving at the capsule: the word fades in and the send key is already
+   in place, so nothing pops in as the card finishes narrowing */
+#promptblock.askfix:not(.condensed) .askword{opacity:0;transition:opacity .16s var(--ease)}
+
+/* the phone dock's suggestions wrap inside their columns: two max-content
+   columns measured 339px against a 294px row and ran out of the card. Equal
+   columns let the longer questions take a second line instead. */
+@media (max-width:720px){
+  #promptblock.open .pinner .chips{grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:var(--space-6) var(--space-12);padding:0 var(--space-12) 0 var(--space-16)}
+  #promptblock.open .pinner .chip{min-width:0}
+}
+
+/* Very short desktop windows (640 and under). The HERO block's own tiers
+   set the headline by content width, so this comes last to win. The docked
+   card's line begins at 512 here; the hero comes up, the headline holds at
+   48, and the booking button, the card and the figures share the lower rows.
+   Measured at 1440x540 and 1600x540 on 2026-10-20. */
+@media (min-width:1100px) and (max-height:640px){
+  :root{--page-top:var(--space-24);--t-display:48px}
+  .hero .byline{margin-bottom:var(--space-8)}
+  .hero h1.display{margin-bottom:var(--space-16)}
+  .hero .herocta{margin-top:var(--space-8)}
+  body:not(.answered) .hero .promptblock{margin-top:var(--space-8)}
+}
+
+/* ---------- statement with bullets and credentials on the right ---------- */
+/* Both columns stretch to the same height: the copy is top-aligned with the
+   headline and its fact list sits on the same bottom line as the credential rows. */
+.stmt-split .stmt-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--space-24);align-items:stretch}
+.stmt-split .statement{max-width:none}
+.stmt-split .stmt-copy{display:flex;flex-direction:column;justify-content:space-between;gap:var(--space-40)}
+/* Client marquee under the headline: one column wide, faded at both edges.
+   The list is written twice in the HTML (the second copy hidden from the
+   keyboard and screen readers). app.js moves the track by transform: it
+   drifts, takes a drag with its momentum, and holds still under the pointer
+   so a logo's tip can be read. Vertical page scroll still works on touch. */
+.stmt-marquee{position:relative;overflow:hidden;padding-block:var(--space-24);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 12%,#000 88%,transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 12%,#000 88%,transparent 100%)}
+.stmt-marquee.is-drag{cursor:grabbing}
+/* The marquee's width is set by app.js to the headline's widest line */
+.stmt-split .stmt-marquee{align-self:flex-start;width:100%}
+.stmt-track{display:flex;width:max-content;list-style:none;margin:0;padding:0;will-change:transform}
+.stmt-track li{display:flex;align-items:center;flex:0 0 auto;padding-inline:var(--space-40)}
+.stmt-logo{display:flex;align-items:center;color:inherit;text-decoration:none;border-radius:var(--r-sm);-webkit-tap-highlight-color:transparent}
+.stmt-logo:focus-visible{outline:2px solid var(--focus);outline-offset:8px}
+.stmt-track img{display:block;height:18px;width:auto;-webkit-user-drag:none;transition:opacity .25s var(--ease)}
+/* the logo under the pointer stays whole; the rest of the strip steps back */
+.stmt-marquee:not(.is-drag):has(.stmt-logo:hover) .stmt-logo:not(:hover) img{opacity:.3}
+html[data-theme="dark"] .stmt-track img{filter:invert(1)}
+@media (prefers-color-scheme: dark){html:not([data-theme="light"]) .stmt-track img{filter:invert(1)}}
+/* One shared tip on the body, placed by app.js above the logo it names. It
+   is a link: the page's own surface with a hairline edge, so it reads as part
+   of the page. It takes the pointer only while it is showing. */
+.stmt-tip{position:fixed;left:0;top:0;z-index:60;display:block;box-sizing:border-box;padding:4px 7px;
+  background:var(--bg);color:var(--ink);border:1px solid var(--line-2);border-radius:var(--r-sm);
+  font-size:.75rem;line-height:1.2;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity .16s var(--ease),border-color var(--dur-hover) var(--ease)}
+.stmt-tip.is-on{opacity:1;pointer-events:auto}
+.stmt-tip:hover{border-color:var(--ink)}
+.stmt-tip:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+@media (prefers-reduced-motion: reduce){.stmt-track img,.stmt-tip{transition:none}}
+/* Credentials: the same bordered badges as the first screen and the sidebar
+   (.cred, artwork 36px high). The two Lovable badges share the first row and
+   Webflow sits alone on the second, all on one left edge with no dividers. */
+/* auto-fit, not a fixed pair of tracks: the two badges are max-content and
+   346px together, wider than their half-column between 721 and about 1000px,
+   so with justify-self:end they spilled left over the statement beside them
+   (measured 768: badges start 102px inside the statement's column). auto-fit
+   takes one track wherever they cannot sit side by side and stacks them
+   (Yar, 2026-10-29). */
+.stmt-creds--side{display:grid;grid-template-columns:repeat(auto-fit,max-content);justify-content:start;align-content:start;align-self:start;justify-self:end;gap:var(--space-12);margin:0;padding:0;list-style:none}
+.stmt-creds--side li{margin:0;padding:0}
+/* Webflow's mark is set smaller so its wordmark reads at a size close to the Lovable badges */
+.stmt-creds--side .cred[href^="https://webflow"] .cred-art{height:26px}
+@media (max-width:720px){
+  .stmt-split .stmt-grid{grid-template-columns:minmax(0,1fr)}
+}
+
+/* ---------- recommendations slider ---------- */
+.qslider{position:relative;overflow:hidden;margin-top:var(--space-16)}
+/* The quotes share one cell: the tallest sets the height and only the
+   current one shows. The change is the decode in app.js, not a slide. */
+.qtrack{display:grid;list-style:none;margin:0;padding:0}
+.qslide{min-width:0;margin:0;grid-area:1/1;opacity:0;visibility:hidden;transition:opacity .3s var(--ease),visibility 0s .3s}
+.qslide.is-on{opacity:1;visibility:visible;transition:opacity .3s var(--ease),visibility 0s}
+.qslide .qwho{opacity:0;transition:opacity .3s var(--ease)}
+.qslide.is-on .qwho{opacity:1;transition-delay:.6s}
+.qslide blockquote{margin:0;max-width:64ch}
+.qslide blockquote p{margin:0;font-size:var(--t-lead);line-height:1.4;letter-spacing:-.01em;color:var(--ink)}
+.qwho{margin:var(--space-20) 0 0;display:flex;flex-direction:column;gap:var(--space-4)}
+.qdots{display:flex;align-items:center;gap:var(--space-4)}
+.qdots button{position:relative;width:24px;height:24px;padding:0;border:0;background:none;cursor:pointer}
+.qdots button::before{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;
+  border-radius:999px;background:var(--line-2);transition:background-color var(--dur-hover) var(--ease)}
+.qdots button[aria-selected="true"]::before{background:var(--ink)}
+@media (prefers-reduced-motion:reduce){.qslide,.qslide .qwho,.qslide.is-on,.qslide.is-on .qwho{transition:none}}
+
+/* the recommendation under the hero's booking button */
+.hero .quotes{margin-top:var(--space-32);padding-top:var(--space-24);border-top:1px solid var(--line-2);max-width:516px}
+.hero .qslider{margin-top:0}
+.hero .qslide blockquote p{font-size:var(--t-body)}
+.hero .qwho{margin:var(--space-12) 0 0;font-size:var(--t-sm);color:var(--muted)}
+.hero .qdots{margin-top:var(--space-16)}
+
+/* the full recommendations page */
+.rec{margin:0;max-width:64ch}
+.rec p{margin:0;font-size:var(--t-lead);line-height:1.5;color:var(--ink)}
+.rec-who{margin:var(--space-16) 0 0;display:flex;flex-direction:column;gap:var(--space-4)}
+.rec-who b{font-weight:var(--fw-heading);color:var(--ink)}
+.rec-who span{font-size:var(--t-sm);color:var(--muted)}
+.hero .qtitle{margin:0 0 var(--space-12)}
